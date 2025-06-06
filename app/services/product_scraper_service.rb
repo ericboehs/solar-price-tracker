@@ -66,11 +66,12 @@ class ProductScraperService
       
       product = Product.find_or_initialize_by(slug: slug)
       
-      # Set basic attributes
+      # Set basic attributes and mark as scraped
       product.assign_attributes(
         title: product_data[:title],
         image_url: product_data[:image_url],
-        url: product_data[:url]
+        url: product_data[:url],
+        last_scraped_at: Time.current
       )
       
       # Handle price separately for historical tracking

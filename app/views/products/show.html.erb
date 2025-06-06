@@ -16,7 +16,7 @@
         <!-- Product Image -->
         <div class="aspect-w-16 aspect-h-9">
           <% if @product.image_url.present? %>
-            <img src="<%= @product.image_url %>" alt="<%= @product.title %>" class="w-full h-64 object-cover">
+            <img src="<%= @product.image_url %>" alt="<%= @product.title %>" class="w-full h-64 object-contain bg-white">
           <% else %>
             <div class="flex items-center justify-center h-64 bg-gray-100">
               <svg class="h-16 w-16 text-gray-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
@@ -64,7 +64,7 @@
           </div>
 
           <!-- Stats -->
-          <div class="grid grid-cols-2 gap-4 pt-4 border-t border-gray-200">
+          <div class="grid grid-cols-3 gap-4 pt-4 border-t border-gray-200">
             <div>
               <dt class="text-sm font-medium text-gray-500">Price Records</dt>
               <dd class="text-lg font-semibold text-gray-900"><%= @product.price_histories.count %></dd>
@@ -79,6 +79,18 @@
                 <% end %>
               </dd>
             </div>
+            <div>
+              <dt class="text-sm font-medium text-gray-500">Last Scraped</dt>
+              <dd class="text-lg font-semibold text-gray-900">
+                <% if @product.last_scraped_at %>
+                  <span title="<%= @product.last_scraped_at.strftime('%m/%d/%Y %H:%M:%S') %>">
+                    <%= time_ago_in_words(@product.last_scraped_at) %> ago
+                  </span>
+                <% else %>
+                  Never
+                <% end %>
+              </dd>
+            </div>
           </div>
         </div>
       </div>
@@ -90,10 +102,12 @@
         <h2 class="text-lg font-medium text-gray-900 mb-4">Price History</h2>
         
         <% if @price_histories.any? %>
-          <!-- Simple Price Chart -->
-          <div class="relative">
-            <canvas id="priceChart" width="400" height="200" class="w-full h-48"></canvas>
-          </div>
+          <% if @price_histories.count > 1 %>
+            <!-- Simple Price Chart -->
+            <div class="relative">
+              <canvas id="priceChart" width="400" height="200" class="w-full h-48"></canvas>
+            </div>
+          <% end %>
 
           <!-- Price History Table -->
           <div class="mt-6">
@@ -151,7 +165,7 @@
   </div>
 </div>
 
-<% if @price_histories.any? %>
+<% if @price_histories.any? && @price_histories.count > 1 %>
   <!-- Chart.js for price visualization -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script>
