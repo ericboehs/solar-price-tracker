@@ -167,18 +167,26 @@
 
 <% if @price_histories.any? && @price_histories.count > 1 %>
   <!-- Chart.js for price visualization -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
   <script>
     document.addEventListener('DOMContentLoaded', function() {
       const ctx = document.getElementById('priceChart').getContext('2d');
-      const priceData = <%= raw @price_histories.reverse.map { |h| { x: h.recorded_at.strftime('%Y-%m-%d'), y: h.price.to_f } }.to_json %>;
+      const priceHistories = <%= raw @price_histories.reverse.to_json %>;
+      
+      const labels = priceHistories.map(h => {
+        const date = new Date(h.recorded_at);
+        return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+      });
+      
+      const prices = priceHistories.map(h => parseFloat(h.price));
       
       new Chart(ctx, {
         type: 'line',
         data: {
+          labels: labels,
           datasets: [{
-            label: 'Price',
-            data: priceData,
+            label: 'Price ($)',
+            data: prices,
             borderColor: '#d97706',
             backgroundColor: 'rgba(217, 119, 6, 0.1)',
             borderWidth: 2,
@@ -189,16 +197,16 @@
         options: {
           responsive: true,
           maintainAspectRatio: false,
+          interaction: {
+            mode: 'index',
+            intersect: false,
+          },
+          hover: {
+            mode: 'index',
+            intersect: false,
+          },
           scales: {
             x: {
-              type: 'time',
-              time: {
-                parser: 'YYYY-MM-DD',
-                tooltipFormat: 'MMM DD, YYYY',
-                displayFormats: {
-                  day: 'MMM DD'
-                }
-              },
               title: {
                 display: true,
                 text: 'Date'
