@@ -54,27 +54,42 @@ class ProductScraperService
   def scrape_and_save_products
     products_data = scrape_products
     saved_count = 0
+    price_changes_count = 0
     
     products_data.each do |product_data|
-      product = Product.find_or_initialize_by(
-        title: product_data[:title],
-        url: product_data[:url]
-      )
+      product = Product.find_or_initialize_by(url: product_data[:url])
       
+      # Set basic attributes
       product.assign_attributes(
-        price: product_data[:price],
+        title: product_data[:title],
         image_url: product_data[:image_url]
       )
       
+      # Handle price separately for historical tracking
+      if product.persisted?
+        # Existing product - check for price changes
+        if product.record_price(product_data[:price])
+          price_changes_count += 1
+          Rails.logger.info "Price change detected for #{product.title}: #{product.price} -> #{product_data[:price]}"
+        end
+      else
+        # New product - set initial price
+        product.price = product_data[:price]
+      end
+      
       if product.save
+        # Create initial price history record for new products
+        unless product.price_histories.exists?
+          product.record_price(product_data[:price])
+        end
         saved_count += 1
       else
         Rails.logger.warn "Failed to save product: #{product.errors.full_messages}"
       end
     end
     
-    Rails.logger.info "Scraped and saved #{saved_count} products"
-    saved_count
+    Rails.logger.info "Scraped and saved #{saved_count} products with #{price_changes_count} price changes"
+    { saved: saved_count, price_changes: price_changes_count }
   end
   
   private
