@@ -61,6 +61,19 @@ class Product < ApplicationRecord
     ((last_price - first_price) / first_price * 100).round(2)
   end
   
+  def highest_price_record
+    price_histories.order(:price).last
+  end
+  
+  def lowest_price_record
+    price_histories.order(:price).first
+  end
+  
+  def at_lowest_price?
+    return false unless lowest_price_record
+    (current_price - lowest_price_record.price).abs < 0.01
+  end
+  
   private
   
   def extract_slug_from_url

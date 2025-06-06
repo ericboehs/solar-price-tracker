@@ -123,6 +123,11 @@
                 <div>
                   <p class="text-lg font-semibold text-gray-900">
                     $<%= number_with_delimiter(product.current_price, delimiter: ',') %>
+                    <% if product.at_lowest_price? %>
+                      <span class="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800 ml-1">
+                        LOW!
+                      </span>
+                    <% end %>
                   </p>
                   <% if product.price_histories.count > 1 %>
                     <% trend = product.price_trend %>
