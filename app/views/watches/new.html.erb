@@ -1,0 +1,97 @@
+<div class="px-4 sm:px-6 lg:px-8">
+  <!-- Header -->
+  <div class="mb-8">
+    <%= link_to watches_path, class: "inline-flex items-center text-sm font-medium text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200" do %>
+      <svg class="mr-2 h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
+        <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" />
+      </svg>
+      Back to Watches
+    <% end %>
+    <h1 class="mt-4 text-2xl font-bold text-gray-900 dark:text-gray-100">New Watch</h1>
+    <p class="mt-2 text-sm text-gray-700 dark:text-gray-300">Create a new watch to track searches or specific products.</p>
+  </div>
+
+  <!-- Form -->
+  <div class="bg-white dark:bg-gray-800 shadow rounded-lg">
+    <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-600">
+      <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">Watch Details</h2>
+    </div>
+    
+    <div class="p-6">
+      <%= form_with model: @watch, local: true, class: "space-y-6" do |form| %>
+        <% if @watch.errors.any? %>
+          <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-md p-4">
+            <div class="flex">
+              <div class="flex-shrink-0">
+                <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                </svg>
+              </div>
+              <div class="ml-3">
+                <h3 class="text-sm font-medium text-red-800 dark:text-red-200">
+                  <%= pluralize(@watch.errors.count, "error") %> prohibited this watch from being saved:
+                </h3>
+                <div class="mt-2 text-sm text-red-700 dark:text-red-300">
+                  <ul class="list-disc pl-5 space-y-1">
+                    <% @watch.errors.full_messages.each do |message| %>
+                      <li><%= message %></li>
+                    <% end %>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        <% end %>
+
+        <div>
+          <%= form.label :name, class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" %>
+          <%= form.text_field :name, class: "block w-full rounded-lg border-gray-300 dark:border-gray-500 bg-white dark:bg-gray-600 text-gray-900 dark:text-gray-100 shadow-sm focus:border-solar-500 focus:ring-solar-500 dark:focus:border-solar-400 dark:focus:ring-solar-400 sm:text-sm px-3 py-2", placeholder: "Enter a descriptive name for this watch" %>
+        </div>
+
+        <div>
+          <%= form.label :description, class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" %>
+          <%= form.text_area :description, rows: 3, class: "block w-full rounded-lg border-gray-300 dark:border-gray-500 bg-white dark:bg-gray-600 text-gray-900 dark:text-gray-100 shadow-sm focus:border-solar-500 focus:ring-solar-500 dark:focus:border-solar-400 dark:focus:ring-solar-400 sm:text-sm px-3 py-2", placeholder: "Optional description of what you're watching for" %>
+        </div>
+
+        <div>
+          <%= form.label :url, "URL", class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1" %>
+          <p class="text-sm text-gray-500 dark:text-gray-400 mb-2">This will be the search or product URL</p>
+          <%= form.url_field :url, class: "block w-full rounded-lg border-gray-300 dark:border-gray-500 bg-white dark:bg-gray-600 text-gray-900 dark:text-gray-100 shadow-sm focus:border-solar-500 focus:ring-solar-500 dark:focus:border-solar-400 dark:focus:ring-solar-400 sm:text-sm px-3 py-2", placeholder: "https://signaturesolar.com/search?q=..." %>
+        </div>
+
+        <div>
+          <%= form.label :omit_list, "Omit List", class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1" %>
+          <p class="text-sm text-gray-500 dark:text-gray-400 mb-2">Comma-separated list of terms to exclude from scraping (e.g., "used, damaged, refurbished")</p>
+          <%= form.text_area :omit_list, rows: 2, class: "block w-full rounded-lg border-gray-300 dark:border-gray-500 bg-white dark:bg-gray-600 text-gray-900 dark:text-gray-100 shadow-sm focus:border-solar-500 focus:ring-solar-500 dark:focus:border-solar-400 dark:focus:ring-solar-400 sm:text-sm px-3 py-2", placeholder: "used, damaged, refurbished, open box" %>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="flex items-start">
+            <div class="flex items-center h-5">
+              <%= form.check_box :exclude_bundles, class: "h-4 w-4 text-solar-600 focus:ring-solar-500 border-gray-300 dark:border-gray-400 bg-white dark:bg-gray-600 rounded" %>
+            </div>
+            <div class="ml-3">
+              <%= form.label :exclude_bundles, "Exclude Bundles", class: "text-sm font-medium text-gray-900 dark:text-gray-100" %>
+              <p class="text-sm text-gray-500 dark:text-gray-400">Automatically exclude products with bundles/kits</p>
+            </div>
+          </div>
+          
+          <div class="flex items-start">
+            <div class="flex items-center h-5">
+              <%= form.check_box :active, class: "h-4 w-4 text-solar-600 focus:ring-solar-500 border-gray-300 dark:border-gray-400 bg-white dark:bg-gray-600 rounded" %>
+            </div>
+            <div class="ml-3">
+              <%= form.label :active, "Active", class: "text-sm font-medium text-gray-900 dark:text-gray-100" %>
+              <p class="text-sm text-gray-500 dark:text-gray-400">Uncheck to disable monitoring</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex justify-end space-x-3">
+          <%= link_to "Cancel", watches_path, class: "inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 text-sm font-medium rounded-md text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-solar-500" %>
+          <%= form.submit "Create Watch", class: "inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-solar-600 hover:bg-solar-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-solar-500" %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>

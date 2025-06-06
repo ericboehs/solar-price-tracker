@@ -1,0 +1,134 @@
+<div class="px-4 sm:px-6 lg:px-8">
+  <!-- Header -->
+  <div class="sm:flex sm:items-center">
+    <div class="sm:flex-auto">
+      <h1 class="text-2xl font-bold text-gray-900 dark:text-gray-100">Watches</h1>
+      <p class="mt-2 text-sm text-gray-700 dark:text-gray-300">Track searches and specific products for automated monitoring.</p>
+    </div>
+    <div class="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
+      <%= link_to "New Watch", new_watch_path, class: "inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-solar-600 hover:bg-solar-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-solar-500" %>
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <div class="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-3">
+    <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-4">
+      <div class="flex items-center">
+        <div class="flex-shrink-0">
+          <svg class="h-8 w-8 text-solar-600" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+          </svg>
+        </div>
+        <div class="ml-4">
+          <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Search Watches</p>
+          <p class="text-2xl font-bold text-gray-900 dark:text-gray-100"><%= @search_watches.count %></p>
+        </div>
+      </div>
+    </div>
+    
+    <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-4">
+      <div class="flex items-center">
+        <div class="flex-shrink-0">
+          <svg class="h-8 w-8 text-blue-600" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 7.125C2.25 6.504 2.754 6 3.375 6h6c.621 0 1.125.504 1.125 1.125v3.75c0 .621-.504 1.125-1.125 1.125h-6a1.125 1.125 0 01-1.125-1.125v-3.75zM14.25 8.625c0-.621.504-1.125 1.125-1.125h5.25c.621 0 1.125.504 1.125 1.125v8.25c0 .621-.504 1.125-1.125 1.125h-5.25a1.125 1.125 0 01-1.125-1.125v-8.25zM3.75 16.125c0-.621.504-1.125 1.125-1.125h5.25c.621 0 1.125.504 1.125 1.125v2.25c0 .621-.504 1.125-1.125 1.125h-5.25A1.125 1.125 0 013.75 18.375v-2.25z" />
+          </svg>
+        </div>
+        <div class="ml-4">
+          <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Product Watches</p>
+          <p class="text-2xl font-bold text-gray-900 dark:text-gray-100"><%= @product_watches.count %></p>
+        </div>
+      </div>
+    </div>
+    
+    <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-4">
+      <div class="flex items-center">
+        <div class="flex-shrink-0">
+          <svg class="h-8 w-8 text-green-600" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+        </div>
+        <div class="ml-4">
+          <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Active Watches</p>
+          <p class="text-2xl font-bold text-gray-900 dark:text-gray-100"><%= @watches.active.count %></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Watches List -->
+  <div class="mt-8">
+    <% if @watches.any? %>
+      <div class="bg-white dark:bg-gray-800 shadow overflow-hidden sm:rounded-lg">
+        <ul class="divide-y divide-gray-200 dark:divide-gray-600">
+          <% @watches.each do |watch| %>
+            <li class="px-6 py-4 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200">
+              <div class="flex items-center justify-between">
+                <div class="flex-1 min-w-0">
+                  <div class="flex items-center space-x-3">
+                    <%= link_to watch_path(watch), class: "text-lg font-medium text-gray-900 dark:text-gray-100 hover:text-solar-600 dark:hover:text-solar-400" do %>
+                      <%= watch.name %>
+                    <% end %>
+                    
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium 
+                      <%= watch.watch_type == 'Search' ? 'bg-solar-100 dark:bg-solar-800 text-solar-800 dark:text-solar-100' : 'bg-blue-100 dark:bg-blue-800 text-blue-800 dark:text-blue-100' %>">
+                      <%= watch.watch_type %>
+                    </span>
+                    
+                    <% unless watch.active? %>
+                      <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300">
+                        Inactive
+                      </span>
+                    <% end %>
+                  </div>
+                  
+                  <div class="mt-1">
+                    <% if watch.description.present? %>
+                      <p class="text-sm text-gray-600 dark:text-gray-400"><%= watch.description %></p>
+                    <% end %>
+                    
+                    <% if watch.search_watch? && watch.url.present? %>
+                      <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                        <span class="font-medium">URL:</span> 
+                        <%= link_to watch.url, watch.url, target: "_blank", rel: "noopener", class: "text-solar-600 dark:text-solar-400 hover:underline" %>
+                      </p>
+                    <% end %>
+                    
+                    <% if watch.omit_list.present? %>
+                      <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                        <span class="font-medium">Omits:</span> <%= watch.omit_terms.join(', ') %>
+                      </p>
+                    <% end %>
+                    
+                    <% if watch.exclude_bundles? %>
+                      <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                        <span class="font-medium">Excludes:</span> Bundles/Kits
+                      </p>
+                    <% end %>
+                    
+                    <% if watch.product_watch? %>
+                      <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                        <span class="font-medium">Product:</span> 
+                        <%= link_to watch.watchable.title, product_path(watch.watchable), class: "text-solar-600 dark:text-solar-400 hover:underline" %>
+                      </p>
+                    <% end %>
+                  </div>
+                </div>
+              </div>
+            </li>
+          <% end %>
+        </ul>
+      </div>
+    <% else %>
+      <div class="text-center py-12">
+        <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+        </svg>
+        <h3 class="mt-2 text-sm font-semibold text-gray-900 dark:text-gray-100">No watches</h3>
+        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Get started by creating a new watch.</p>
+        <div class="mt-6">
+          <%= link_to "New Watch", new_watch_path, class: "inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md shadow-sm text-white bg-solar-600 hover:bg-solar-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-solar-500" %>
+        </div>
+      </div>
+    <% end %>
+  </div>
+</div>
