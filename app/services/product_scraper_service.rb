@@ -40,6 +40,9 @@ class ProductScraperService
         product_data = extract_product_data(card)
         next unless product_data[:title] && product_data[:price]
         
+        # Skip bundles - user doesn't want these
+        next if bundle_product?(card, product_data)
+        
         products << product_data
       end
       
@@ -57,12 +60,17 @@ class ProductScraperService
     price_changes_count = 0
     
     products_data.each do |product_data|
-      product = Product.find_or_initialize_by(url: product_data[:url])
+      # Extract slug from URL for deduplication
+      slug = extract_slug_from_url(product_data[:url])
+      next unless slug.present?
+      
+      product = Product.find_or_initialize_by(slug: slug)
       
       # Set basic attributes
       product.assign_attributes(
         title: product_data[:title],
-        image_url: product_data[:image_url]
+        image_url: product_data[:image_url],
+        url: product_data[:url]
       )
       
       # Handle price separately for historical tracking
@@ -216,5 +224,40 @@ class ProductScraperService
     match = text.match(/\$?([\d,]+\.?\d*)/)
     return nil unless match
     match[1].gsub(',', '').to_f
+  end
+  
+  def extract_slug_from_url(url)
+    return nil if url.blank?
+    
+    begin
+      uri = URI.parse(url)
+      path = uri.path
+      slug = path.split('/').last.split('?').first
+      
+      # Clean the slug
+      slug = slug.gsub(/[^a-z0-9\-]/, '').strip
+      
+      slug.present? ? slug : nil
+    rescue URI::InvalidURIError
+      nil
+    end
+  end
+  
+  def bundle_product?(card, product_data)
+    title = product_data[:title]
+    return false unless title
+    
+    # Check for bundle indicators in title
+    return true if title.downcase.include?('bundle')
+    return true if title.include?('BNDL-')
+    
+    # Check for "Options" button (bundles have Options instead of Add to Cart)
+    options_button = card.css('button, .button, .btn').find do |btn|
+      btn.text.strip.downcase.include?('option')
+    end
+    
+    return true if options_button
+    
+    false
   end
 end

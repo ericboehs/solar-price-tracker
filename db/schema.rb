@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_06_06_201842) do
+ActiveRecord::Schema[8.0].define(version: 2025_06_06_204210) do
   create_table "price_histories", force: :cascade do |t|
     t.integer "product_id", null: false
     t.decimal "price", precision: 10, scale: 2, null: false
@@ -29,6 +29,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_06_201842) do
     t.string "url"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "slug"
+    t.index ["slug"], name: "index_products_on_slug", unique: true
   end
 
   add_foreign_key "price_histories", "products"

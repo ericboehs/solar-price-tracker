@@ -2,7 +2,10 @@ class Product < ApplicationRecord
   has_many :price_histories, dependent: :destroy
   
   validates :title, presence: true
-  validates :url, presence: true, uniqueness: true
+  validates :url, presence: true
+  validates :slug, presence: true, uniqueness: true
+  
+  before_validation :extract_slug_from_url, on: :create
   
   def current_price
     price_histories.recent.first&.price || price
@@ -56,5 +59,30 @@ class Product < ApplicationRecord
     last_price = histories.last.price
     
     ((last_price - first_price) / first_price * 100).round(2)
+  end
+  
+  private
+  
+  def extract_slug_from_url
+    return if slug.present? || url.blank?
+    
+    begin
+      uri = URI.parse(url)
+      path = uri.path
+      extracted_slug = path.split('/').last.split('?').first
+      
+      # Clean the slug
+      extracted_slug = extracted_slug.gsub(/[^a-z0-9\-]/, '').strip
+      
+      if extracted_slug.present?
+        self.slug = extracted_slug
+      else
+        # Fallback: generate slug from title
+        self.slug = title.downcase.gsub(/[^a-z0-9\s]/, '').strip.gsub(/\s+/, '-')
+      end
+    rescue URI::InvalidURIError
+      # Fallback: generate slug from title if URL is invalid
+      self.slug = title.downcase.gsub(/[^a-z0-9\s]/, '').strip.gsub(/\s+/, '-')
+    end
   end
 end
