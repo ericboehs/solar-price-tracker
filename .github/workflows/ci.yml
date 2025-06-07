@@ -58,6 +58,7 @@ jobs:
         run: bin/rubocop -f github
 
   test:
+    name: "Test Suite & Coverage"
     runs-on: ubuntu-latest
 
     # services:
@@ -91,33 +92,68 @@ jobs:
         id: coverage
         run: |
           if [ -f coverage/.last_run.json ]; then
+            # Extract comprehensive coverage data
             COVERAGE=$(cat coverage/.last_run.json | jq -r '.result.line')
+            COVERED_LINES=$(cat coverage/.last_run.json | jq -r '.result.covered_lines')
+            TOTAL_LINES=$(cat coverage/.last_run.json | jq -r '.result.total_lines')
+            MISSED_LINES=$(cat coverage/.last_run.json | jq -r '.result.missed_lines')
+            
+            # Extract branch coverage if available
+            BRANCH_COVERAGE=$(cat coverage/.last_run.json | jq -r '.result.branch // "N/A"')
+            
+            # Calculate additional stats
+            if [ "$TOTAL_LINES" != "null" ] && [ "$TOTAL_LINES" -gt 0 ]; then
+              COVERAGE_RATIO="${COVERED_LINES}/${TOTAL_LINES}"
+            else
+              COVERAGE_RATIO="N/A"
+            fi
+            
             echo "percentage=$COVERAGE" >> $GITHUB_OUTPUT
             echo "Coverage: $COVERAGE%"
             
-            # Generate coverage summary for job summary
+            # Generate comprehensive coverage summary
             echo "## 📊 Test Coverage Report" >> $GITHUB_STEP_SUMMARY
             echo "" >> $GITHUB_STEP_SUMMARY
-            echo "**Overall Coverage: ${COVERAGE}%**" >> $GITHUB_STEP_SUMMARY
+            echo "**Overall Line Coverage: ${COVERAGE}%**" >> $GITHUB_STEP_SUMMARY
             echo "" >> $GITHUB_STEP_SUMMARY
             
-            COVERED=$(cat coverage/.last_run.json | jq -r '.result.covered_lines')
-            TOTAL=$(cat coverage/.last_run.json | jq -r '.result.total_lines')
-            echo "- Covered Lines: ${COVERED}" >> $GITHUB_STEP_SUMMARY
-            echo "- Total Lines: ${TOTAL}" >> $GITHUB_STEP_SUMMARY
+            # Coverage breakdown
+            echo "### 📈 Coverage Statistics" >> $GITHUB_STEP_SUMMARY
+            echo "| Metric | Value |" >> $GITHUB_STEP_SUMMARY
+            echo "|--------|--------|" >> $GITHUB_STEP_SUMMARY
+            echo "| **Lines Covered** | ${COVERED_LINES} |" >> $GITHUB_STEP_SUMMARY
+            echo "| **Total Lines** | ${TOTAL_LINES} |" >> $GITHUB_STEP_SUMMARY
+            echo "| **Lines Missed** | ${MISSED_LINES} |" >> $GITHUB_STEP_SUMMARY
+            echo "| **Coverage Ratio** | ${COVERAGE_RATIO} |" >> $GITHUB_STEP_SUMMARY
+            
+            if [ "$BRANCH_COVERAGE" != "N/A" ] && [ "$BRANCH_COVERAGE" != "null" ]; then
+              echo "| **Branch Coverage** | ${BRANCH_COVERAGE}% |" >> $GITHUB_STEP_SUMMARY
+            fi
+            
             echo "" >> $GITHUB_STEP_SUMMARY
             
             # Add color-coded badge to summary
             if (( $(echo "$COVERAGE >= 90" | bc -l) )); then
               echo "![Coverage](https://img.shields.io/badge/coverage-${COVERAGE}%25-brightgreen)" >> $GITHUB_STEP_SUMMARY
+              echo "🟢 **Excellent coverage!** Keep up the great work!" >> $GITHUB_STEP_SUMMARY
             elif (( $(echo "$COVERAGE >= 70" | bc -l) )); then
               echo "![Coverage](https://img.shields.io/badge/coverage-${COVERAGE}%25-yellow)" >> $GITHUB_STEP_SUMMARY
+              echo "🟡 **Good coverage.** Consider adding more tests to reach 90%." >> $GITHUB_STEP_SUMMARY
+            elif (( $(echo "$COVERAGE >= 50" | bc -l) )); then
+              echo "![Coverage](https://img.shields.io/badge/coverage-${COVERAGE}%25-orange)" >> $GITHUB_STEP_SUMMARY
+              echo "🟠 **Moderate coverage.** More tests needed to improve quality." >> $GITHUB_STEP_SUMMARY
             else
               echo "![Coverage](https://img.shields.io/badge/coverage-${COVERAGE}%25-red)" >> $GITHUB_STEP_SUMMARY
+              echo "🔴 **Low coverage.** Significant testing improvements needed." >> $GITHUB_STEP_SUMMARY
             fi
+            
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "📋 [Download detailed HTML coverage report](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})" >> $GITHUB_STEP_SUMMARY
           else
             echo "percentage=0" >> $GITHUB_OUTPUT
-            echo "❌ Coverage report not generated" >> $GITHUB_STEP_SUMMARY
+            echo "## ❌ Coverage Report" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "Coverage report not generated. Check test execution logs." >> $GITHUB_STEP_SUMMARY
           fi
 
       - name: Upload coverage report
@@ -170,5 +206,5 @@ jobs:
           KAMAL_REGISTRY_PASSWORD: ${{ secrets.KAMAL_REGISTRY_PASSWORD }}
           RAILS_MASTER_KEY: ${{ secrets.RAILS_MASTER_KEY }}
         run: |
-          echo $RAILS_MASTER_KEY > config/credentials/production.key
+          echo $RAILS_MASTER_KEY > config/master.key
           bundle exec kamal deploy --version=$VERSION
