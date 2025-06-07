@@ -93,7 +93,7 @@ class ProductScraperServiceTest < ActiveSupport::TestCase
     html = "<html><body><div class='product-card'><h4 class='product-title'><a href='/products/test-battery'>Test Battery</a></h4><div class='price'><span class='sale-price--withoutTax'>$999.99</span></div><img class='product-image' src='/image.jpg'></div></body></html>"
     doc = Nokogiri::HTML(html)
     @service.expects(:fetch_document).returns(doc)
-    
+
     products = @service.scrape_products
     assert_equal 1, products.length
     assert_equal "Test Battery", products.first[:title]
@@ -103,9 +103,9 @@ class ProductScraperServiceTest < ActiveSupport::TestCase
   test "extract_product_data extracts all product information" do
     card_html = "<div class='product-card'><h4 class='product-title'><a href='/products/test-battery'>Test Battery</a></h4><div class='price'><span class='sale-price--withoutTax'>$999.99</span></div><img class='product-image' src='/image.jpg'></div>"
     card = Nokogiri::HTML::DocumentFragment.parse(card_html).children.first
-    
+
     result = @service.send(:extract_product_data, card)
-    
+
     assert_equal "Test Battery", result[:title]
     assert_equal 999.99, result[:price]
     assert_equal "https://signaturesolar.com/products/test-battery", result[:url]
@@ -115,9 +115,9 @@ class ProductScraperServiceTest < ActiveSupport::TestCase
   test "extract_product_data handles missing elements" do
     card_html = "<div class='product-card'></div>"
     card = Nokogiri::HTML::DocumentFragment.parse(card_html).children.first
-    
+
     result = @service.send(:extract_product_data, card)
-    
+
     assert_nil result[:title]
     assert_nil result[:price]
     assert_nil result[:url]
@@ -127,7 +127,7 @@ class ProductScraperServiceTest < ActiveSupport::TestCase
   test "extract_product_data chooses lowest price from multiple elements" do
     card_html = "<div class='product-card'><h4 class='product-title'><a href='/test'>Test</a></h4><div class='price'>$200.00</div><div class='price'>$150.00</div><div class='price'>$180.00</div></div>"
     card = Nokogiri::HTML::DocumentFragment.parse(card_html).children.first
-    
+
     result = @service.send(:extract_product_data, card)
     assert_equal 150.0, result[:price]
   end
@@ -135,7 +135,7 @@ class ProductScraperServiceTest < ActiveSupport::TestCase
   test "extract_product_data filters out non-sale prices" do
     card_html = "<div class='product-card'><h4 class='product-title'><a href='/test'>Test</a></h4><div class='price non-sale-price'>$300.00</div><div class='price sale-price'>$200.00</div></div>"
     card = Nokogiri::HTML::DocumentFragment.parse(card_html).children.first
-    
+
     result = @service.send(:extract_product_data, card)
     assert_equal 200.0, result[:price]
   end
@@ -143,9 +143,9 @@ class ProductScraperServiceTest < ActiveSupport::TestCase
   test "extract_single_product_data extracts from product detail page" do
     html = "<html><body><div class='product-details'><h1 class='product-title'>Single Product</h1><div class='price--main'><span class='price--withoutTax'>$1500.00</span></div><div class='productView-image-main'><img src='/single.jpg'></div></div></body></html>"
     doc = Nokogiri::HTML(html)
-    
+
     result = @service.send(:extract_single_product_data, doc)
-    
+
     assert_equal "Single Product", result[:title]
     assert_equal 1500.0, result[:price]
     assert_equal "https://signaturesolar.com/single.jpg", result[:image_url]
@@ -155,9 +155,9 @@ class ProductScraperServiceTest < ActiveSupport::TestCase
   test "extract_single_product_data handles meta tags" do
     html = "<html><head><meta property='og:title' content='Meta Product'><meta property='product:price:amount' content='2000.00'><meta property='og:image' content='/meta.jpg'></head><body><div class='product-details'></div></body></html>"
     doc = Nokogiri::HTML(html)
-    
+
     result = @service.send(:extract_single_product_data, doc)
-    
+
     assert_equal "Meta Product", result[:title]
     assert_equal 2000.0, result[:price]
     assert_equal "https://signaturesolar.com/meta.jpg", result[:image_url]
@@ -167,7 +167,7 @@ class ProductScraperServiceTest < ActiveSupport::TestCase
     html = "<html><body><div class='product-card'><h4 class='product-title'><a href='/products/new-test-battery'>New Test Battery</a></h4><div class='price'><span class='sale-price--withoutTax'>$1299.99</span></div></div></body></html>"
     doc = Nokogiri::HTML(html)
     @service.expects(:fetch_document).returns(doc)
-    
+
     assert_difference "Product.count", 1 do
       result = @service.scrape_and_save_products
       assert_equal 1, result[:saved]
@@ -179,15 +179,15 @@ class ProductScraperServiceTest < ActiveSupport::TestCase
     # Create existing product
     product = products(:one)
     product.update!(slug: "new-test-battery", price: 800.0, url: "https://example.com/test")
-    
+
     html = "<html><body><div class='product-card'><h4 class='product-title'><a href='/products/new-test-battery'>New Test Battery</a></h4><div class='price'><span class='sale-price--withoutTax'>$1299.99</span></div></div></body></html>"
     doc = Nokogiri::HTML(html)
     @service.expects(:fetch_document).returns(doc)
-    
+
     result = @service.scrape_and_save_products
     assert_equal 1, result[:saved]
     assert_equal 1, result[:price_changes]
-    
+
     product.reload
     assert_equal 1299.99, product.price
   end
@@ -196,7 +196,7 @@ class ProductScraperServiceTest < ActiveSupport::TestCase
     html = "<html><body><div class='product-card'><h4 class='product-title'><a href='/products/unique-battery-#{Time.current.to_i}'>Unique Battery</a></h4><div class='price'><span class='sale-price--withoutTax'>$999.99</span></div></div></body></html>"
     doc = Nokogiri::HTML(html)
     @service.expects(:fetch_document).returns(doc)
-    
+
     assert_difference "PriceHistory.count", 1 do
       @service.scrape_and_save_products
     end
@@ -206,7 +206,7 @@ class ProductScraperServiceTest < ActiveSupport::TestCase
     html = "<html><body><div class='product-card'><h4 class='product-title'><a href=''>No URL Product</a></h4><div class='price'>$999.99</div></div></body></html>"
     doc = Nokogiri::HTML(html)
     @service.expects(:fetch_document).returns(doc)
-    
+
     assert_no_difference "Product.count" do
       result = @service.scrape_and_save_products
       assert_equal 0, result[:saved]
@@ -217,7 +217,7 @@ class ProductScraperServiceTest < ActiveSupport::TestCase
     html = "<html><body><div class='product-card'><h4 class='product-title'><a href='/products/no-price-battery'>No Price Battery</a></h4></div></body></html>"
     doc = Nokogiri::HTML(html)
     @service.expects(:fetch_document).returns(doc)
-    
+
     assert_no_difference "Product.count" do
       result = @service.scrape_and_save_products
       assert_equal 0, result[:saved]
@@ -228,7 +228,7 @@ class ProductScraperServiceTest < ActiveSupport::TestCase
     html = "<html><body><div class='product-card'><div class='price'>$999.99</div></div></body></html>"
     doc = Nokogiri::HTML(html)
     @service.expects(:fetch_document).returns(doc)
-    
+
     assert_no_difference "Product.count" do
       result = @service.scrape_and_save_products
       assert_equal 0, result[:saved]
@@ -239,7 +239,7 @@ class ProductScraperServiceTest < ActiveSupport::TestCase
     html = "<html><body><div class='product-card'><h4 class='product-title'><a href='/products/battery-bundle'>Battery Bundle</a></h4><div class='price'>$999.99</div></div><div class='product-card'><h4 class='product-title'><a href='/products/regular-battery'>Regular Battery</a></h4><div class='price'>$799.99</div></div></body></html>"
     doc = Nokogiri::HTML(html)
     @service.expects(:fetch_document).returns(doc)
-    
+
     products = @service.scrape_products
     assert_equal 1, products.length
     assert_equal "Regular Battery", products.first[:title]
@@ -249,7 +249,7 @@ class ProductScraperServiceTest < ActiveSupport::TestCase
     html = "<html><body><div class='product-card'><h4 class='product-title'><a href='/products/bndl-123'>BNDL-123 Special</a></h4><div class='price'>$999.99</div></div><div class='product-card'><h4 class='product-title'><a href='/products/regular-battery'>Regular Battery</a></h4><div class='price'>$799.99</div></div></body></html>"
     doc = Nokogiri::HTML(html)
     @service.expects(:fetch_document).returns(doc)
-    
+
     products = @service.scrape_products
     assert_equal 1, products.length
     assert_equal "Regular Battery", products.first[:title]
@@ -259,7 +259,7 @@ class ProductScraperServiceTest < ActiveSupport::TestCase
     html = "<html><body><div class='product-card'><h4 class='product-title'><a href='/products/test1'>Test Product 1</a></h4><div class='price'>$999.99</div><button>View Options</button></div><div class='product-card'><h4 class='product-title'><a href='/products/test2'>Test Product 2</a></h4><div class='price'>$799.99</div><button>Add to Cart</button></div></body></html>"
     doc = Nokogiri::HTML(html)
     @service.expects(:fetch_document).returns(doc)
-    
+
     products = @service.scrape_products
     assert_equal 1, products.length
     assert_equal "Test Product 2", products.first[:title]
