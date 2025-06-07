@@ -10,6 +10,8 @@ A Ruby on Rails 8 application that tracks solar equipment prices by scraping pro
 - **📈 Interactive Charts**: Chart.js integration with price trend analysis and mouse snapping
 - **🌙 Dark Mode**: Comprehensive dark theme with image dimming and localStorage persistence
 - **📱 Responsive Design**: Mobile-first approach with Tailwind CSS
+- **🔐 Authentication**: Rails 8 built-in authentication with login-only access
+- **🛡️ Security**: XSS protection and safe URL handling
 - **🚀 Modern Rails**: Built with Rails 8, Turbo, and Stimulus
 
 ## 🛠️ Architecture
@@ -25,6 +27,11 @@ A Ruby on Rails 8 application that tracks solar equipment prices by scraping pro
 - **Watch**: Polymorphic model for monitoring URLs or specific products
   - Advanced filtering with omit lists and bundle exclusion
   - Support for both search URLs and individual product tracking
+  - Protected behind authentication
+
+- **User**: Authentication model with secure password handling
+  - Email-based login with bcrypt password hashing
+  - Session management with proper security measures
 
 ### Services
 
@@ -59,20 +66,29 @@ bundle install
 rails db:create db:migrate db:seed
 ```
 
-4. Start the development server:
+4. Create a user account (Rails console):
+```ruby
+rails console
+User.create!(email_address: "your@email.com", password: "your_password")
+```
+
+5. Start the development server:
 ```bash
 rails server
 ```
 
-5. Visit `http://localhost:3000` to access the application
+6. Visit `http://localhost:3000` to access the application
+   - Products are publicly accessible
+   - Login at `/session/new` to access watches functionality
 
 ## 📝 Usage
 
 ### Basic Operations
 
-- **View Products**: Browse the product grid with price change indicators
-- **Product Details**: Click any product to see detailed price history and charts
-- **Create Watches**: Monitor specific URLs for new products or track individual items
+- **View Products**: Browse the product grid with price change indicators (public access)
+- **Product Details**: Click any product to see detailed price history and charts (public access)
+- **Authentication**: Login to access watch management features
+- **Create Watches**: Monitor specific URLs for new products or track individual items (requires login)
 - **Dark Mode**: Toggle between light and dark themes (persists across sessions)
 
 ### Web Scraping
@@ -111,6 +127,8 @@ The application uses SQLite3 by default. Key tables:
 - `products`: Product information with slug indexing
 - `price_histories`: Historical price data with timestamp indexing  
 - `watches`: Polymorphic watch configuration with filtering options
+- `users`: Authentication with bcrypt password hashing
+- `sessions`: Session management for user authentication
 
 ## 🧪 Testing
 
@@ -133,13 +151,39 @@ bin/rubocop -A
 
 The application is containerized and ready for deployment:
 
-```bash
-# Using Kamal (included)
-kamal deploy
+### Using Kamal (Recommended)
 
-# Or build Docker image
+1. Set up your server with Docker and configure `config/deploy.yml`
+2. Set environment variables in `.envrc`:
+   ```bash
+   export GITHUB_TOKEN="your_github_token"
+   ```
+
+3. Initial setup:
+   ```bash
+   kamal setup
+   ```
+
+4. Deploy updates:
+   ```bash
+   kamal deploy
+   ```
+
+### Manual Docker Deployment
+
+```bash
+# Build Docker image
 docker build -t solar-price-tracker .
+
+# Run container
+docker run -p 3000:3000 solar-price-tracker
 ```
+
+### Production Considerations
+
+- Database seeds are automatically skipped in production
+- Ensure proper user accounts are created for production access
+- XSS protection is enabled by default
 
 ## 🤝 Contributing
 
