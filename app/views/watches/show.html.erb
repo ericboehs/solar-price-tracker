@@ -60,7 +60,7 @@
                 <div>
                   <dt class="text-sm font-medium text-gray-700 dark:text-gray-300">Watch URL</dt>
                   <dd class="text-sm text-gray-900 dark:text-gray-100 break-all">
-                    <%= link_to @watch.url, @watch.url, target: "_blank", rel: "noopener", class: "text-solar-600 dark:text-solar-400 hover:underline break-all" %>
+                    <%= safe_link_to @watch.url, @watch.url, target: "_blank", rel: "noopener", class: "text-solar-600 dark:text-solar-400 hover:underline break-all" %>
                   </dd>
                 </div>
               <% end %>

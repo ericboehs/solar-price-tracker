@@ -116,12 +116,17 @@ The application uses SQLite3 by default. Key tables:
 
 Run the test suite:
 ```bash
-rails test
+bin/rails test
 ```
 
 For system tests:
 ```bash
-rails test:system
+bin/rails test:system
+```
+
+Code quality and style:
+```bash
+bin/rubocop -A
 ```
 
 ## 📦 Deployment
