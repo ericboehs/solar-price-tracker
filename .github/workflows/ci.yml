@@ -58,7 +58,6 @@ jobs:
         run: bin/rubocop -f github
 
   test:
-    name: "Test Suite & Coverage"
     runs-on: ubuntu-latest
 
     # services:
@@ -92,24 +91,64 @@ jobs:
         id: coverage
         run: |
           if [ -f coverage/.last_run.json ]; then
-            # Extract comprehensive coverage data
+            # Extract basic coverage percentage
             COVERAGE=$(cat coverage/.last_run.json | jq -r '.result.line')
-            COVERED_LINES=$(cat coverage/.last_run.json | jq -r '.result.covered_lines')
-            TOTAL_LINES=$(cat coverage/.last_run.json | jq -r '.result.total_lines')
-            MISSED_LINES=$(cat coverage/.last_run.json | jq -r '.result.missed_lines')
-            
-            # Extract branch coverage if available
-            BRANCH_COVERAGE=$(cat coverage/.last_run.json | jq -r '.result.branch // "N/A"')
-            
-            # Calculate additional stats
-            if [ "$TOTAL_LINES" != "null" ] && [ "$TOTAL_LINES" -gt 0 ]; then
-              COVERAGE_RATIO="${COVERED_LINES}/${TOTAL_LINES}"
-            else
-              COVERAGE_RATIO="N/A"
-            fi
-            
             echo "percentage=$COVERAGE" >> $GITHUB_OUTPUT
             echo "Coverage: $COVERAGE%"
+            
+            # Extract detailed stats from the main resultset if available
+            if [ -f coverage/.resultset.json ]; then
+              # Create a Ruby script to extract detailed coverage stats
+              cat > extract_coverage_stats.rb << 'EOF'
+              require 'json'
+              
+              begin
+                resultset = JSON.parse(File.read('coverage/.resultset.json'))
+                
+                # Get the first (and usually only) test run data
+                test_data = resultset.values.first
+                
+                if test_data && test_data['coverage']
+                  total_lines = 0
+                  covered_lines = 0
+                  
+                  test_data['coverage'].each do |file, lines|
+                    next unless file.start_with?('./app/') # Only count app files
+                    
+                    lines.each do |line_coverage|
+                      if line_coverage.is_a?(Integer) || line_coverage == 0
+                        total_lines += 1
+                        covered_lines += 1 if line_coverage && line_coverage > 0
+                      end
+                    end
+                  end
+                  
+                  missed_lines = total_lines - covered_lines
+                  
+                  puts "TOTAL_LINES=#{total_lines}"
+                  puts "COVERED_LINES=#{covered_lines}"
+                  puts "MISSED_LINES=#{missed_lines}"
+                else
+                  puts "TOTAL_LINES=N/A"
+                  puts "COVERED_LINES=N/A"  
+                  puts "MISSED_LINES=N/A"
+                end
+              rescue => e
+                puts "TOTAL_LINES=N/A"
+                puts "COVERED_LINES=N/A"
+                puts "MISSED_LINES=N/A"
+              end
+              EOF
+              
+              # Run the Ruby script and capture output
+              STATS_OUTPUT=$(ruby extract_coverage_stats.rb)
+              eval "$STATS_OUTPUT"
+              rm extract_coverage_stats.rb
+            else
+              TOTAL_LINES="N/A"
+              COVERED_LINES="N/A"
+              MISSED_LINES="N/A"
+            fi
             
             # Generate comprehensive coverage summary
             echo "## 📊 Test Coverage Report" >> $GITHUB_STEP_SUMMARY
@@ -124,15 +163,14 @@ jobs:
             echo "| **Lines Covered** | ${COVERED_LINES} |" >> $GITHUB_STEP_SUMMARY
             echo "| **Total Lines** | ${TOTAL_LINES} |" >> $GITHUB_STEP_SUMMARY
             echo "| **Lines Missed** | ${MISSED_LINES} |" >> $GITHUB_STEP_SUMMARY
-            echo "| **Coverage Ratio** | ${COVERAGE_RATIO} |" >> $GITHUB_STEP_SUMMARY
             
-            if [ "$BRANCH_COVERAGE" != "N/A" ] && [ "$BRANCH_COVERAGE" != "null" ]; then
-              echo "| **Branch Coverage** | ${BRANCH_COVERAGE}% |" >> $GITHUB_STEP_SUMMARY
+            if [ "$TOTAL_LINES" != "N/A" ] && [ "$TOTAL_LINES" -gt 0 ]; then
+              echo "| **Coverage Ratio** | ${COVERED_LINES}/${TOTAL_LINES} |" >> $GITHUB_STEP_SUMMARY
             fi
             
             echo "" >> $GITHUB_STEP_SUMMARY
             
-            # Add color-coded badge to summary
+            # Add color-coded badge and feedback
             if (( $(echo "$COVERAGE >= 90" | bc -l) )); then
               echo "![Coverage](https://img.shields.io/badge/coverage-${COVERAGE}%25-brightgreen)" >> $GITHUB_STEP_SUMMARY
               echo "🟢 **Excellent coverage!** Keep up the great work!" >> $GITHUB_STEP_SUMMARY
