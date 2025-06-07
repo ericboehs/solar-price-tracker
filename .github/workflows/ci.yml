@@ -85,7 +85,6 @@ jobs:
           CI: true
           # REDIS_URL: redis://localhost:6379/0
         run: |
-          # Disable parallel testing for accurate coverage
           bin/rails db:test:prepare test test:system
 
       - name: Extract coverage for badge
