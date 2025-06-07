@@ -14,36 +14,42 @@ class ProductScraperService
     begin
       doc = fetch_document(@search_url)
 
-      # Try multiple possible selectors for product cards
-      selectors = [
-        ".product-card",
-        ".card",
-        ".product-item",
-        ".item",
-        "article",
-        ".listitem"
-      ]
+      # Check if this is a single product page
+      if single_product_page?(doc)
+        product_data = extract_single_product_data(doc)
+        products << product_data if product_data[:title] && product_data[:price]
+      else
+        # Try multiple possible selectors for product cards
+        selectors = [
+          ".product-card",
+          ".card",
+          ".product-item",
+          ".item",
+          "article",
+          ".listitem"
+        ]
 
-      product_cards = nil
-      selectors.each do |selector|
-        elements = doc.css(selector)
-        if elements.length > 0
-          product_cards = elements
-          Rails.logger.info "Found #{elements.length} products using selector: #{selector}"
-          break
+        product_cards = nil
+        selectors.each do |selector|
+          elements = doc.css(selector)
+          if elements.length > 0
+            product_cards = elements
+            Rails.logger.info "Found #{elements.length} products using selector: #{selector}"
+            break
+          end
         end
-      end
 
-      return [] unless product_cards
+        return [] unless product_cards
 
-      product_cards.each do |card|
-        product_data = extract_product_data(card)
-        next unless product_data[:title] && product_data[:price]
+        product_cards.each do |card|
+          product_data = extract_product_data(card)
+          next unless product_data[:title] && product_data[:price]
 
-        # Skip bundles - user doesn't want these
-        next if bundle_product?(card, product_data)
+          # Skip bundles - user doesn't want these
+          next if bundle_product?(card, product_data)
 
-        products << product_data
+          products << product_data
+        end
       end
 
     rescue => e
@@ -260,5 +266,88 @@ class ProductScraperService
     return true if options_button
 
     false
+  end
+
+  def single_product_page?(doc)
+    # Check for common indicators of a product detail page
+    product_detail_selectors = [
+      ".product-details",
+      ".product-main",
+      ".productView",
+      'meta[property="og:type"][content="product"]',
+      ".product-single",
+      "#product-detail"
+    ]
+
+    product_detail_selectors.any? { |selector| doc.at_css(selector) }
+  end
+
+  def extract_single_product_data(doc)
+    # Extract title
+    title = nil
+    title_selectors = [
+      "h1.product-title",
+      "h1.productView-title",
+      ".product-details h1",
+      ".product-main h1",
+      'meta[property="og:title"]',
+      "h1"
+    ]
+
+    title_selectors.each do |selector|
+      element = doc.at_css(selector)
+      if element
+        title = selector.include?("meta") ? element["content"] : element.text.strip
+        break if title.present?
+      end
+    end
+
+    # Extract price
+    price = nil
+    price_selectors = [
+      ".price--main .price--withoutTax",
+      ".price-section .price--withoutTax",
+      ".productView-price .price--withoutTax",
+      'meta[property="product:price:amount"]',
+      ".product-price .current-price",
+      ".price-now"
+    ]
+
+    price_selectors.each do |selector|
+      element = doc.at_css(selector)
+      if element
+        price_text = selector.include?("meta") ? element["content"] : element.text.strip
+        price = extract_price(price_text)
+        break if price
+      end
+    end
+
+    # Extract image
+    image_url = nil
+    image_selectors = [
+      ".productView-image-main img",
+      ".product-image-main img",
+      ".product-gallery img",
+      'meta[property="og:image"]',
+      ".product-photo img"
+    ]
+
+    image_selectors.each do |selector|
+      element = doc.at_css(selector)
+      if element
+        image_url = selector.include?("meta") ? element["content"] : element["src"]
+        break if image_url.present?
+      end
+    end
+
+    # Clean up image URL to be absolute
+    image_url = "#{BASE_URL}#{image_url}" if image_url&.start_with?("/")
+
+    {
+      title: title,
+      price: price,
+      image_url: image_url,
+      url: @search_url
+    }
   end
 end
