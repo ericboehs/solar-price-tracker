@@ -1,0 +1,11 @@
+production:
+  scrape_watches:
+    class: ScrapeWatchesJob
+    queue: default
+    schedule: at 2am every day
+
+development:
+  scrape_watches:
+    class: ScrapeWatchesJob
+    queue: default
+    schedule: every 30 minutes

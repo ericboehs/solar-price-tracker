@@ -8,10 +8,10 @@ image: ghcr.io/ericboehs/solar-price-tracker
 servers:
   web:
     - 192.210.167.222
-  # job:
-  #   hosts:
-  #     - 192.168.0.1
-  #   cmd: bin/jobs
+  job:
+    hosts:
+      - 192.210.167.222
+    cmd: bin/jobs
 
 # Cloudflare handles SSL termination, so we disable SSL here and use the domain
 proxy:
