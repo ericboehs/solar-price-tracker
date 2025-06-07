@@ -1,8 +1,10 @@
-# Clear existing data
-Product.destroy_all
+# Only seed development data in development environment
+unless Rails.env.production?
+  # Clear existing data
+  Product.destroy_all
 
-# Create sample products with realistic data based on current scraped products
-products_data = [
+  # Create sample products with realistic data based on current scraped products
+  products_data = [
   {
     title: "EG4 FlexBOSS18 13kW AC Hybrid Inverter | 48V Split Phase | 18kW PV Input",
     slug: "eg4-flexboss18-hybrid-inverter",
@@ -107,33 +109,36 @@ products_data = [
       { days_ago: 5, price: 4898.00 },
       { days_ago: 0, price: 4898.00 }
     ]
-  }
-]
+    }
+  ]
 
-puts "Creating products with price histories..."
+  puts "Creating products with price histories..."
 
-products_data.each do |data|
-  product = Product.create!(
-    title: data[:title],
-    slug: data[:slug],
-    url: data[:url],
-    image_url: data[:image_url],
-    price: data[:price_history].last[:price],
-    last_scraped_at: Time.current
-  )
-
-  # Create price history records
-  data[:price_history].each do |history_data|
-    recorded_at = history_data[:days_ago].days.ago
-    product.price_histories.create!(
-      price: history_data[:price],
-      recorded_at: recorded_at
+  products_data.each do |data|
+    product = Product.create!(
+      title: data[:title],
+      slug: data[:slug],
+      url: data[:url],
+      image_url: data[:image_url],
+      price: data[:price_history].last[:price],
+      last_scraped_at: Time.current
     )
+
+    # Create price history records
+    data[:price_history].each do |history_data|
+      recorded_at = history_data[:days_ago].days.ago
+      product.price_histories.create!(
+        price: history_data[:price],
+        recorded_at: recorded_at
+      )
+    end
+
+    puts "Created #{product.title} with #{product.price_histories.count} price records"
   end
 
-  puts "Created #{product.title} with #{product.price_histories.count} price records"
+  puts "Seed data created successfully!"
+  puts "Total products: #{Product.count}"
+  puts "Total price history records: #{PriceHistory.count}"
+else
+  puts "Skipping seed data in production environment"
 end
-
-puts "Seed data created successfully!"
-puts "Total products: #{Product.count}"
-puts "Total price history records: #{PriceHistory.count}"
