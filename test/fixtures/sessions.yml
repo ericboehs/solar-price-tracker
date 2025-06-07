@@ -1,4 +1,4 @@
 test_session:
-  user: test_user
-  user_agent: "Test User Agent"
+  user: user_one
+  user_agent: "Mozilla/5.0 Test Browser"
   ip_address: "127.0.0.1"

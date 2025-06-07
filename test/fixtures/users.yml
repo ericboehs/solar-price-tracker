@@ -1,7 +1,7 @@
-ericboehs:
-  email_address: eric@boehs.com
+user_one:
+  email_address: user1@example.com
   password_digest: <%= BCrypt::Password.create("password123") %>
 
-test_user:
-  email_address: test@example.com
+user_two:
+  email_address: user2@example.com
   password_digest: <%= BCrypt::Password.create("password123") %>
