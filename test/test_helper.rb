@@ -18,9 +18,9 @@ module ActionDispatch
   class IntegrationTest
     def sign_in(user)
       session = user.sessions.create!(user_agent: "Test", ip_address: "127.0.0.1")
-      post session_url, params: { 
-        email_address: user.email_address, 
-        password: "password123" 
+      post session_url, params: {
+        email_address: user.email_address,
+        password: "password123"
       }
     end
 
