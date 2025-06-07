@@ -5,6 +5,10 @@ on:
   push:
     branches: [ main ]
 
+permissions:
+  contents: read
+  packages: write
+
 jobs:
   scan_ruby:
     runs-on: ubuntu-latest
@@ -124,8 +128,8 @@ jobs:
           labels: |
             "service=solar-price-tracker"
           tags: |
-            "ghcr.io/ericboehs/solar-price-tracker:latest"
-            "ghcr.io/ericboehs/solar-price-tracker:${{ github.sha }}"
+            "ghcr.io/${{ github.repository_owner }}/solar-price-tracker:latest"
+            "ghcr.io/${{ github.repository_owner }}/solar-price-tracker:${{ github.sha }}"
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
