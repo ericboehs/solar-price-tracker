@@ -92,11 +92,28 @@ jobs:
         run: |
           if [ -f coverage/.last_run.json ]; then
             COVERAGE=$(cat coverage/.last_run.json | jq -r '.result.line')
+            BRANCH_COVERAGE=$(cat coverage/.last_run.json | jq -r '.result.branch // "N/A"')
             echo "percentage=$COVERAGE" >> $GITHUB_OUTPUT
+            echo "branch_percentage=$BRANCH_COVERAGE" >> $GITHUB_OUTPUT
             echo "Coverage: $COVERAGE%"
+            
+            # Add to GitHub Actions job summary
+            echo "## 🧪 Test Coverage Report" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "| Metric | Coverage |" >> $GITHUB_STEP_SUMMARY
+            echo "|--------|----------|" >> $GITHUB_STEP_SUMMARY
+            echo "| **Line Coverage** | **${COVERAGE}%** |" >> $GITHUB_STEP_SUMMARY
+            if [ "$BRANCH_COVERAGE" != "N/A" ]; then
+              echo "| **Branch Coverage** | **${BRANCH_COVERAGE}%** |" >> $GITHUB_STEP_SUMMARY
+            fi
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "📊 [View Detailed Coverage Report](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})" >> $GITHUB_STEP_SUMMARY
           else
             echo "percentage=0" >> $GITHUB_OUTPUT
+            echo "branch_percentage=0" >> $GITHUB_OUTPUT
             echo "Coverage file not found"
+            echo "## ❌ Coverage Report" >> $GITHUB_STEP_SUMMARY
+            echo "Coverage file not found" >> $GITHUB_STEP_SUMMARY
           fi
 
       - name: Upload coverage report

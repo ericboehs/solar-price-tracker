@@ -1,7 +1,6 @@
 # Solar Price Tracker 🌞
 
 [![CI](https://github.com/ericboehs/solar-price-tracker/actions/workflows/ci.yml/badge.svg)](https://github.com/ericboehs/solar-price-tracker/actions/workflows/ci.yml)
-[![Coverage](https://img.shields.io/badge/coverage-66%25-yellow)](https://github.com/ericboehs/solar-price-tracker/actions)
 [![Ruby](https://img.shields.io/badge/ruby-3.4+-red.svg)](https://ruby-lang.org)
 [![Rails](https://img.shields.io/badge/rails-8.0+-red.svg)](https://rubyonrails.org)
 
@@ -137,6 +136,13 @@ The application uses SQLite3 by default. Key tables:
 
 ## 🧪 Testing
 
+The application has comprehensive test coverage with parallel testing support:
+
+- **167 tests** covering all major components
+- **97.97% line coverage** (386/394 lines)
+- **89.1% branch coverage** (139/156 branches)
+- **SimpleCov integration** with parallel test result merging
+
 Run the test suite:
 ```bash
 bin/rails test
@@ -145,6 +151,11 @@ bin/rails test
 For system tests:
 ```bash
 bin/rails test:system
+```
+
+View coverage report (generated after running tests):
+```bash
+open coverage/index.html
 ```
 
 Code quality and style:
