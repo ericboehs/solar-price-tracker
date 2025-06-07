@@ -23,5 +23,14 @@ module SolarPriceTracker
     #
     # config.time_zone = "Central Time (US & Canada)"
     # config.eager_load_paths << Rails.root.join("extras")
+
+    # Configure Solid Queue recurring tasks
+    config.solid_queue.recurring_tasks = [
+      {
+        class_name: "ScrapeWatchesJob",
+        cron: "0 6 * * *",  # Run daily at 6 AM UTC
+        queue: "default"
+      }
+    ]
   end
 end
