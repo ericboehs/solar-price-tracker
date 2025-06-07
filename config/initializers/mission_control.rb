@@ -1,4 +1,8 @@
-MissionControl::Jobs.configure do |config|
-  # Disable HTTP Basic Auth for development environment
-  config.http_basic_auth_enabled = false if Rails.env.development?
+# Disable Mission Control Jobs HTTP Basic Auth in development
+if Rails.env.development?
+  Rails.application.config.to_prepare do
+    MissionControl::Jobs::ApplicationController.class_eval do
+      skip_before_action :authenticate_by_http_basic
+    end
+  end
 end
