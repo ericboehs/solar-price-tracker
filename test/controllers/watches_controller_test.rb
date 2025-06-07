@@ -2,37 +2,45 @@ require "test_helper"
 
 class WatchesControllerTest < ActionDispatch::IntegrationTest
   test "should get index" do
-    get watches_index_url
+    get watches_url
     assert_response :success
   end
 
   test "should get show" do
-    get watches_show_url
+    watch = watches(:one)
+    get watch_url(watch)
     assert_response :success
   end
 
   test "should get new" do
-    get watches_new_url
+    get new_watch_url
     assert_response :success
   end
 
-  test "should get create" do
-    get watches_create_url
-    assert_response :success
+  test "should create watch" do
+    assert_difference("Watch.count") do
+      post watches_url, params: { watch: { name: "Test Watch", url: "https://example.com", active: true } }
+    end
+    assert_redirected_to watch_url(Watch.last)
   end
 
   test "should get edit" do
-    get watches_edit_url
+    watch = watches(:one)
+    get edit_watch_url(watch)
     assert_response :success
   end
 
-  test "should get update" do
-    get watches_update_url
-    assert_response :success
+  test "should update watch" do
+    watch = watches(:one)
+    patch watch_url(watch), params: { watch: { name: "Updated Watch" } }
+    assert_redirected_to watch_url(watch)
   end
 
-  test "should get destroy" do
-    get watches_destroy_url
-    assert_response :success
+  test "should destroy watch" do
+    watch = watches(:one)
+    assert_difference("Watch.count", -1) do
+      delete watch_url(watch)
+    end
+    assert_redirected_to watches_url
   end
 end
