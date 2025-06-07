@@ -1,11 +1,59 @@
-<%= tag.div(flash[:alert], style: "color:red") if flash[:alert] %>
-<%= tag.div(flash[:notice], style: "color:green") if flash[:notice] %>
+<div class="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 py-12 px-4 sm:px-6 lg:px-8">
+  <div class="max-w-md w-full space-y-8">
+    <div>
+      <div class="mx-auto h-12 w-12 flex items-center justify-center">
+        <svg class="w-8 h-8 text-solar-600 dark:text-solar-400" fill="currentColor" viewBox="0 0 20 20">
+          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+        </svg>
+      </div>
+      <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900 dark:text-white">
+        Sign in to Solar Price Tracker
+      </h2>
+    </div>
+    
+    <% if flash[:alert] %>
+      <div class="rounded-md bg-red-50 dark:bg-red-900 p-4">
+        <div class="text-sm text-red-700 dark:text-red-200">
+          <%= flash[:alert] %>
+        </div>
+      </div>
+    <% end %>
+    
+    <% if flash[:notice] %>
+      <div class="rounded-md bg-green-50 dark:bg-green-900 p-4">
+        <div class="text-sm text-green-700 dark:text-green-200">
+          <%= flash[:notice] %>
+        </div>
+      </div>
+    <% end %>
 
-<%= form_with url: session_path do |form| %>
-  <%= form.email_field :email_address, required: true, autofocus: true, autocomplete: "username", placeholder: "Enter your email address", value: params[:email_address] %><br>
-  <%= form.password_field :password, required: true, autocomplete: "current-password", placeholder: "Enter your password", maxlength: 72 %><br>
-  <%= form.submit "Sign in" %>
-<% end %>
-<br>
+    <%= form_with url: session_path, local: true, class: "mt-8 space-y-6" do |form| %>
+      <div class="rounded-md shadow-sm -space-y-px">
+        <div>
+          <%= form.label :email_address, "Email address", class: "sr-only" %>
+          <%= form.email_field :email_address, 
+                required: true, 
+                autofocus: true, 
+                autocomplete: "username", 
+                placeholder: "Email address", 
+                value: params[:email_address],
+                class: "appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white bg-white dark:bg-gray-800 rounded-t-md focus:outline-none focus:ring-solar-500 focus:border-solar-500 focus:z-10 sm:text-sm" %>
+        </div>
+        <div>
+          <%= form.label :password, "Password", class: "sr-only" %>
+          <%= form.password_field :password, 
+                required: true, 
+                autocomplete: "current-password", 
+                placeholder: "Password", 
+                maxlength: 72,
+                class: "appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white bg-white dark:bg-gray-800 rounded-b-md focus:outline-none focus:ring-solar-500 focus:border-solar-500 focus:z-10 sm:text-sm" %>
+        </div>
+      </div>
 
-<%= link_to "Forgot password?", new_password_path %>
+      <div>
+        <%= form.submit "Sign in", 
+              class: "group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-solar-600 hover:bg-solar-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-solar-500 dark:focus:ring-offset-gray-900" %>
+      </div>
+    <% end %>
+  </div>
+</div>
