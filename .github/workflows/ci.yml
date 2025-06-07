@@ -107,7 +107,6 @@ jobs:
               echo "| **Branch Coverage** | **${BRANCH_COVERAGE}%** |" >> $GITHUB_STEP_SUMMARY
             fi
             echo "" >> $GITHUB_STEP_SUMMARY
-            echo "📊 [View Detailed Coverage Report](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})" >> $GITHUB_STEP_SUMMARY
           else
             echo "percentage=0" >> $GITHUB_OUTPUT
             echo "branch_percentage=0" >> $GITHUB_OUTPUT
