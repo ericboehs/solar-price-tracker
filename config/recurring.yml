@@ -6,7 +6,7 @@ production:
   scrape_watches_noon:
     class: ScrapeWatchesJob
     queue: default
-    schedule: at 11:45am CT every day
+    schedule: at 12pm CT every day
 
 development:
   scrape_watches:
