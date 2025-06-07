@@ -31,4 +31,10 @@ class Watch < ApplicationRecord
   def omit_terms=(terms)
     self.omit_list = Array(terms).join(", ")
   end
+
+  def safe_url
+    return nil unless url.present?
+    return nil unless url.match?(/\Ahttps?:\/\//)
+    url
+  end
 end

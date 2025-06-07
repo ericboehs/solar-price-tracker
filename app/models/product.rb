@@ -2,7 +2,7 @@ class Product < ApplicationRecord
   has_many :price_histories, dependent: :destroy
 
   validates :title, presence: true
-  validates :url, presence: true
+  validates :url, presence: true, format: { with: URI::DEFAULT_PARSER.make_regexp(%w[http https]), message: "must be a valid HTTP or HTTPS URL" }
   validates :slug, presence: true, uniqueness: true
 
   before_validation :extract_slug_from_url, on: :create
@@ -72,6 +72,12 @@ class Product < ApplicationRecord
   def at_lowest_price?
     return false unless lowest_price_record
     (current_price - lowest_price_record.price).abs < 0.01
+  end
+
+  def safe_url
+    return nil unless url.present?
+    return nil unless url.match?(/\Ahttps?:\/\//)
+    url
   end
 
   private
