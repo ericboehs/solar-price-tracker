@@ -2,6 +2,9 @@ Rails.application.routes.draw do
   resources :watches
   resources :products, only: [ :index, :show ]
 
+  # Mount Mission Control Jobs for background job monitoring
+  mount MissionControl::Jobs::Engine => "/mission_control/jobs"
+
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 
   # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.
