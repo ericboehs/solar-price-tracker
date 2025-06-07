@@ -1,6 +1,6 @@
 class ProductsController < ApplicationController
-  before_action :set_product, only: [:show]
-  
+  before_action :set_product, only: [ :show ]
+
   def index
     @products = Product.includes(:price_histories)
                       .order(:title)
@@ -18,23 +18,23 @@ class ProductsController < ApplicationController
     @price_trend = @product.price_trend
     @price_change = @product.price_change_percentage
   end
-  
+
   private
-  
+
   def set_product
     @product = Product.find(params[:id])
   end
-  
+
   def calculate_average_weekly_change
     products_with_weekly_data = @products.select do |product|
       product.price_change_percentage(7) # 7 days instead of default 30
     end
-    
+
     return nil if products_with_weekly_data.empty?
-    
+
     changes = products_with_weekly_data.map { |product| product.price_change_percentage(7) }.compact
     return nil if changes.empty?
-    
+
     (changes.sum / changes.length).round(2)
   end
 end

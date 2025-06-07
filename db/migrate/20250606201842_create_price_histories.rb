@@ -7,8 +7,8 @@ class CreatePriceHistories < ActiveRecord::Migration[8.0]
 
       t.timestamps
     end
-    
-    add_index :price_histories, [:product_id, :recorded_at]
+
+    add_index :price_histories, [ :product_id, :recorded_at ]
     add_index :price_histories, :recorded_at
   end
 end

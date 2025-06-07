@@ -11,8 +11,8 @@ class CreateWatches < ActiveRecord::Migration[8.0]
 
       t.timestamps
     end
-    
-    add_index :watches, [:watchable_type, :watchable_id]
+
+    add_index :watches, [ :watchable_type, :watchable_id ]
     add_index :watches, :active
   end
 end
