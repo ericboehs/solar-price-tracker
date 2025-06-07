@@ -1,5 +1,10 @@
 # Solar Price Tracker 🌞
 
+[![CI](https://github.com/ericboehs/solar-price-tracker/actions/workflows/ci.yml/badge.svg)](https://github.com/ericboehs/solar-price-tracker/actions/workflows/ci.yml)
+[![Coverage](https://img.shields.io/badge/coverage-66%25-yellow)](https://github.com/ericboehs/solar-price-tracker/actions)
+[![Ruby](https://img.shields.io/badge/ruby-3.4+-red.svg)](https://ruby-lang.org)
+[![Rails](https://img.shields.io/badge/rails-8.0+-red.svg)](https://rubyonrails.org)
+
 A Ruby on Rails 8 application that tracks solar equipment prices by scraping product data, storing historical price information, and providing a responsive web interface with comprehensive dark mode support.
 
 ## ✨ Features
