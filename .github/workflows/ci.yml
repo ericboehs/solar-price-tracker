@@ -96,54 +96,40 @@ jobs:
             echo "percentage=$COVERAGE" >> $GITHUB_OUTPUT
             echo "Coverage: $COVERAGE%"
             
-            # Extract detailed stats from the main resultset if available
+            # Extract detailed stats using Ruby one-liner to avoid YAML issues
             if [ -f coverage/.resultset.json ]; then
-              # Create a Ruby script to extract detailed coverage stats
-              cat > extract_coverage_stats.rb << 'RUBY_EOF'
-require 'json'
-
-begin
-  resultset = JSON.parse(File.read('coverage/.resultset.json'))
-  
-  # Get the first (and usually only) test run data
-  test_data = resultset.values.first
-  
-  if test_data && test_data['coverage']
-    total_lines = 0
-    covered_lines = 0
-    
-    test_data['coverage'].each do |file, lines|
-      next unless file.start_with?('./app/') # Only count app files
-      
-      lines.each do |line_coverage|
-        if line_coverage.is_a?(Integer) || line_coverage == 0
-          total_lines += 1
-          covered_lines += 1 if line_coverage && line_coverage > 0
-        end
-      end
-    end
-    
-    missed_lines = total_lines - covered_lines
-    
-    puts "TOTAL_LINES=#{total_lines}"
-    puts "COVERED_LINES=#{covered_lines}"
-    puts "MISSED_LINES=#{missed_lines}"
-  else
-    puts "TOTAL_LINES=N/A"
-    puts "COVERED_LINES=N/A"  
-    puts "MISSED_LINES=N/A"
-  end
-rescue => e
-  puts "TOTAL_LINES=N/A"
-  puts "COVERED_LINES=N/A"
-  puts "MISSED_LINES=N/A"
-end
-RUBY_EOF
-              
-              # Run the Ruby script and capture output
-              STATS_OUTPUT=$(ruby extract_coverage_stats.rb)
+              STATS_OUTPUT=$(ruby -rjson -e "
+                begin
+                  resultset = JSON.parse(File.read('coverage/.resultset.json'))
+                  test_data = resultset.values.first
+                  if test_data && test_data['coverage']
+                    total_lines = 0
+                    covered_lines = 0
+                    test_data['coverage'].each do |file, lines|
+                      next unless file.start_with?('./app/')
+                      lines.each do |line_coverage|
+                        if line_coverage.is_a?(Integer) || line_coverage == 0
+                          total_lines += 1
+                          covered_lines += 1 if line_coverage && line_coverage > 0
+                        end
+                      end
+                    end
+                    missed_lines = total_lines - covered_lines
+                    puts \"TOTAL_LINES=#{total_lines}\"
+                    puts \"COVERED_LINES=#{covered_lines}\"
+                    puts \"MISSED_LINES=#{missed_lines}\"
+                  else
+                    puts 'TOTAL_LINES=N/A'
+                    puts 'COVERED_LINES=N/A'
+                    puts 'MISSED_LINES=N/A'
+                  end
+                rescue
+                  puts 'TOTAL_LINES=N/A'
+                  puts 'COVERED_LINES=N/A'
+                  puts 'MISSED_LINES=N/A'
+                end
+              ")
               eval "$STATS_OUTPUT"
-              rm extract_coverage_stats.rb
             else
               TOTAL_LINES="N/A"
               COVERED_LINES="N/A"
