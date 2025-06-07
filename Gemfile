@@ -30,6 +30,9 @@ gem "solid_cache"
 gem "solid_queue"
 gem "solid_cable"
 
+# Mission Control for job monitoring
+gem "mission_control-jobs"
+
 # Reduces boot times through caching; required in config/boot.rb
 gem "bootsnap", require: false
 

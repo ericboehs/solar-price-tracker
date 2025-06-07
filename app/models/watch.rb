@@ -5,6 +5,8 @@ class Watch < ApplicationRecord
   validates :url, presence: true, if: -> { watchable.nil? }
   validates :url, format: { with: URI::DEFAULT_PARSER.make_regexp(%w[http https]), message: "must be a valid URL" }, if: -> { url.present? }
 
+  after_create :enqueue_scrape_job, if: :should_auto_scrape?
+
   scope :active, -> { where(active: true) }
   scope :searches, -> { where(watchable: nil) }
   scope :product_watches, -> { where(watchable_type: "Product") }
@@ -36,5 +38,15 @@ class Watch < ApplicationRecord
     return nil unless url.present?
     return nil unless url.match?(/\Ahttps?:\/\//)
     url
+  end
+
+  private
+
+  def should_auto_scrape?
+    active? && search_watch?
+  end
+
+  def enqueue_scrape_job
+    ScrapeWatchesJob.perform_later
   end
 end
