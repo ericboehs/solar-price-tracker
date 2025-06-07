@@ -87,97 +87,16 @@ jobs:
         run: |
           bin/rails db:test:prepare test test:system
 
-      - name: Extract coverage for badge
+      - name: Extract coverage percentage
         id: coverage
         run: |
           if [ -f coverage/.last_run.json ]; then
-            # Extract basic coverage percentage
             COVERAGE=$(cat coverage/.last_run.json | jq -r '.result.line')
             echo "percentage=$COVERAGE" >> $GITHUB_OUTPUT
             echo "Coverage: $COVERAGE%"
-            
-            # Extract detailed stats using Ruby one-liner to avoid YAML issues
-            if [ -f coverage/.resultset.json ]; then
-              STATS_OUTPUT=$(ruby -rjson -e "
-                begin
-                  resultset = JSON.parse(File.read('coverage/.resultset.json'))
-                  test_data = resultset.values.first
-                  if test_data && test_data['coverage']
-                    total_lines = 0
-                    covered_lines = 0
-                    test_data['coverage'].each do |file, lines|
-                      next unless file.start_with?('./app/')
-                      lines.each do |line_coverage|
-                        if line_coverage.is_a?(Integer) || line_coverage == 0
-                          total_lines += 1
-                          covered_lines += 1 if line_coverage && line_coverage > 0
-                        end
-                      end
-                    end
-                    missed_lines = total_lines - covered_lines
-                    puts \"TOTAL_LINES=#{total_lines}\"
-                    puts \"COVERED_LINES=#{covered_lines}\"
-                    puts \"MISSED_LINES=#{missed_lines}\"
-                  else
-                    puts 'TOTAL_LINES=N/A'
-                    puts 'COVERED_LINES=N/A'
-                    puts 'MISSED_LINES=N/A'
-                  end
-                rescue
-                  puts 'TOTAL_LINES=N/A'
-                  puts 'COVERED_LINES=N/A'
-                  puts 'MISSED_LINES=N/A'
-                end
-              ")
-              eval "$STATS_OUTPUT"
-            else
-              TOTAL_LINES="N/A"
-              COVERED_LINES="N/A"
-              MISSED_LINES="N/A"
-            fi
-            
-            # Generate comprehensive coverage summary
-            echo "## 📊 Test Coverage Report" >> $GITHUB_STEP_SUMMARY
-            echo "" >> $GITHUB_STEP_SUMMARY
-            echo "**Overall Line Coverage: ${COVERAGE}%**" >> $GITHUB_STEP_SUMMARY
-            echo "" >> $GITHUB_STEP_SUMMARY
-            
-            # Coverage breakdown
-            echo "### 📈 Coverage Statistics" >> $GITHUB_STEP_SUMMARY
-            echo "| Metric | Value |" >> $GITHUB_STEP_SUMMARY
-            echo "|--------|--------|" >> $GITHUB_STEP_SUMMARY
-            echo "| **Lines Covered** | ${COVERED_LINES} |" >> $GITHUB_STEP_SUMMARY
-            echo "| **Total Lines** | ${TOTAL_LINES} |" >> $GITHUB_STEP_SUMMARY
-            echo "| **Lines Missed** | ${MISSED_LINES} |" >> $GITHUB_STEP_SUMMARY
-            
-            if [ "$TOTAL_LINES" != "N/A" ] && [ "$TOTAL_LINES" -gt 0 ]; then
-              echo "| **Coverage Ratio** | ${COVERED_LINES}/${TOTAL_LINES} |" >> $GITHUB_STEP_SUMMARY
-            fi
-            
-            echo "" >> $GITHUB_STEP_SUMMARY
-            
-            # Add color-coded badge and feedback
-            if (( $(echo "$COVERAGE >= 90" | bc -l) )); then
-              echo "![Coverage](https://img.shields.io/badge/coverage-${COVERAGE}%25-brightgreen)" >> $GITHUB_STEP_SUMMARY
-              echo "🟢 **Excellent coverage!** Keep up the great work!" >> $GITHUB_STEP_SUMMARY
-            elif (( $(echo "$COVERAGE >= 70" | bc -l) )); then
-              echo "![Coverage](https://img.shields.io/badge/coverage-${COVERAGE}%25-yellow)" >> $GITHUB_STEP_SUMMARY
-              echo "🟡 **Good coverage.** Consider adding more tests to reach 90%." >> $GITHUB_STEP_SUMMARY
-            elif (( $(echo "$COVERAGE >= 50" | bc -l) )); then
-              echo "![Coverage](https://img.shields.io/badge/coverage-${COVERAGE}%25-orange)" >> $GITHUB_STEP_SUMMARY
-              echo "🟠 **Moderate coverage.** More tests needed to improve quality." >> $GITHUB_STEP_SUMMARY
-            else
-              echo "![Coverage](https://img.shields.io/badge/coverage-${COVERAGE}%25-red)" >> $GITHUB_STEP_SUMMARY
-              echo "🔴 **Low coverage.** Significant testing improvements needed." >> $GITHUB_STEP_SUMMARY
-            fi
-            
-            echo "" >> $GITHUB_STEP_SUMMARY
-            echo "📋 [Download detailed HTML coverage report](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})" >> $GITHUB_STEP_SUMMARY
           else
             echo "percentage=0" >> $GITHUB_OUTPUT
-            echo "## ❌ Coverage Report" >> $GITHUB_STEP_SUMMARY
-            echo "" >> $GITHUB_STEP_SUMMARY
-            echo "Coverage report not generated. Check test execution logs." >> $GITHUB_STEP_SUMMARY
+            echo "Coverage file not found"
           fi
 
       - name: Upload coverage report

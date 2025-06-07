@@ -49,13 +49,10 @@ env:
 # aliases:
 #   shell: app exec --interactive --reuse "bash"
 
-# SSH configuration for automated deployments
-ssh:
-  options:
-    - StrictHostKeyChecking=no
-    - UserKnownHostsFile=/dev/null
-    - PasswordAuthentication=no
-    - BatchMode=yes
+# Use a different ssh user than root
+#
+# ssh:
+#   user: app
 
 # Use a persistent storage volume.
 volumes:
