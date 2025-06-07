@@ -1,4 +1,5 @@
 class WatchesController < ApplicationController
+  before_action :require_authentication
   before_action :set_watch, only: [ :show, :edit, :update, :destroy ]
 
   def index

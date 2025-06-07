@@ -1,0 +1,4 @@
+test_session:
+  user: test_user
+  user_agent: "Test User Agent"
+  ip_address: "127.0.0.1"

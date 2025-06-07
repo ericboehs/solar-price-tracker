@@ -1,6 +1,10 @@
 require "test_helper"
 
 class WatchesControllerTest < ActionDispatch::IntegrationTest
+  setup do
+    sign_in(users(:test_user))
+  end
+
   test "should get index" do
     get watches_url
     assert_response :success

@@ -13,3 +13,19 @@ module ActiveSupport
     # Add more helper methods to be used by all tests here...
   end
 end
+
+module ActionDispatch
+  class IntegrationTest
+    def sign_in(user)
+      session = user.sessions.create!(user_agent: "Test", ip_address: "127.0.0.1")
+      post session_url, params: { 
+        email_address: user.email_address, 
+        password: "password123" 
+      }
+    end
+
+    def sign_out
+      delete session_url
+    end
+  end
+end
