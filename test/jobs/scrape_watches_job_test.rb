@@ -7,9 +7,9 @@ class ScrapeWatchesJobTest < ActiveJob::TestCase
       url: "https://signaturesolar.com/test",
       active: true
     )
-    
+
     @inactive_search_watch = Watch.create!(
-      name: "Inactive Search Watch", 
+      name: "Inactive Search Watch",
       url: "https://signaturesolar.com/inactive",
       active: false
     )
@@ -18,9 +18,9 @@ class ScrapeWatchesJobTest < ActiveJob::TestCase
   test "should skip inactive watches" do
     # Only inactive watch exists, so no scraping should occur
     @active_search_watch.destroy
-    
+
     result = ScrapeWatchesJob.new.perform
-    
+
     assert_equal 0, result[:total_saved]
     assert_equal 0, result[:total_price_changes]
   end
@@ -28,9 +28,9 @@ class ScrapeWatchesJobTest < ActiveJob::TestCase
   test "should return results hash" do
     # Test with no active watches to avoid actual scraping
     @active_search_watch.destroy
-    
+
     result = ScrapeWatchesJob.new.perform
-    
+
     assert_kind_of Hash, result
     assert_includes result.keys, :total_saved
     assert_includes result.keys, :total_price_changes
