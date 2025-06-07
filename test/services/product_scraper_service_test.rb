@@ -53,7 +53,7 @@ class ProductScraperServiceTest < ActiveSupport::TestCase
   end
 
   test "bundle_product detection by title" do
-    card = Nokogiri::HTML('<div></div>').at('div')
+    card = Nokogiri::HTML("<div></div>").at("div")
     assert @service.send(:bundle_product?, card, { title: "Battery Bundle Pack" })
     assert @service.send(:bundle_product?, card, { title: "BNDL-123 Special" })
     refute @service.send(:bundle_product?, card, { title: "Regular Battery" })
@@ -61,7 +61,7 @@ class ProductScraperServiceTest < ActiveSupport::TestCase
   end
 
   test "bundle_product detection by options button" do
-    card = Nokogiri::HTML('<div><button>View Options</button></div>').at('div')
+    card = Nokogiri::HTML("<div><button>View Options</button></div>").at("div")
     assert @service.send(:bundle_product?, card, { title: "Regular Battery" })
   end
 
