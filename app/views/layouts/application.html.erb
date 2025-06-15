@@ -27,13 +27,13 @@
   </head>
 
   <body class="bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 min-h-full">
-    <nav class="bg-white dark:bg-gray-800 shadow" data-controller="mobile-menu">
+    <nav class="fixed top-0 left-0 right-0 z-50 bg-white/10 dark:bg-gray-800/50 backdrop-blur-sm border-b border-white/20" data-controller="mobile-menu">
       <div class="mx-auto max-w-7xl px-2 sm:px-6 lg:px-8">
         <div class="relative flex h-16 items-center justify-between">
           <!-- Logo/Brand -->
           <div class="flex flex-1 items-center justify-start">
             <div class="flex shrink-0 items-center">
-              <%= link_to root_path, class: "text-xl font-bold text-blue-600 dark:text-blue-400" do %>
+              <%= link_to root_path, class: "text-xl font-bold text-gray-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-200" do %>
                 ☀️ Solar Price Tracker
               <% end %>
             </div>
@@ -42,10 +42,10 @@
           <!-- Desktop menu -->
           <div class="hidden sm:ml-6 sm:flex sm:items-center sm:space-x-4">
             <% if authenticated? %>
-              <span class="flex items-center px-3 py-2 text-sm font-medium text-gray-500 dark:text-gray-400">
+              <span class="flex items-center px-3 py-2 text-sm font-medium text-white/80">
                 <%= current_user.email_address %>
                 <% if admin? %>
-                  <span class="ml-2 px-2 py-1 text-xs font-semibold bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-300 rounded-full">
+                  <span class="ml-2 px-2 py-1 text-xs font-semibold bg-red-500/20 text-red-300 rounded-full">
                     Admin
                   </span>
                 <% end %>
@@ -55,7 +55,7 @@
                     data: { turbo_method: :delete, turbo_confirm: "Are you sure?" } %>
             <% else %>
               <%= link_to "Sign in", new_session_path,
-                    class: "rounded-md px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white transition-colors" %>
+                    class: "rounded-md px-3 py-2 text-sm font-medium text-white/80 hover:bg-white/10 hover:text-white transition-colors" %>
               <%= link_to "Sign up", new_registration_path,
                     class: "rounded-md px-3 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors" %>
             <% end %>
@@ -65,7 +65,7 @@
           <div class="flex items-center sm:hidden">
             <button type="button"
                     data-action="click->mobile-menu#toggle"
-                    class="relative inline-flex items-center justify-center rounded-md p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500 dark:hover:bg-gray-700 dark:hover:text-gray-300"
+                    class="relative inline-flex items-center justify-center rounded-md p-2 text-gray-900/80 dark:text-white/80 hover:bg-gray-200/20 dark:hover:bg-white/10 hover:text-gray-900 dark:hover:text-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500"
                     aria-controls="mobile-menu"
                     aria-expanded="false">
               <span class="absolute -inset-0.5"></span>
@@ -82,23 +82,23 @@
       </div>
 
       <!-- Mobile menu -->
-      <div class="hidden sm:hidden" id="mobile-menu" data-mobile-menu-target="menu">
-        <div class="space-y-1 px-2 pb-3 pt-2">
+      <div class="hidden" id="mobile-menu" data-mobile-menu-target="menu">
+        <div class="sm:hidden space-y-1 px-2 pb-3 pt-2 bg-white/10 dark:bg-gray-800/50 backdrop-blur-sm border-t border-white/20 dark:border-gray-700/20">
           <% if authenticated? %>
-            <div class="px-3 py-2 text-sm text-gray-500 dark:text-gray-400">
+            <div class="px-3 py-2 text-sm text-gray-700 dark:text-white/80">
               Signed in as <%= current_user.email_address %>
               <% if admin? %>
-                <span class="ml-1 px-2 py-1 text-xs font-semibold bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-300 rounded-full">
+                <span class="ml-1 px-2 py-1 text-xs font-semibold bg-red-500/20 text-red-300 rounded-full">
                   Admin
                 </span>
               <% end %>
             </div>
             <%= link_to "Sign out", session_path, method: :delete,
-                  class: "block rounded-md px-3 py-2 text-base font-medium text-red-600 hover:bg-red-50 hover:text-red-700 dark:text-red-400 dark:hover:bg-red-900/20",
+                  class: "block rounded-md px-3 py-2 text-base font-medium text-red-600 dark:text-red-400 hover:bg-red-100/20 dark:hover:bg-red-500/20 hover:text-red-700 dark:hover:text-red-300",
                   data: { turbo_method: :delete, turbo_confirm: "Are you sure?" } %>
           <% else %>
             <%= link_to "Sign in", new_session_path,
-                  class: "block rounded-md px-3 py-2 text-base font-medium text-gray-700 hover:bg-gray-50 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-700" %>
+                  class: "block rounded-md px-3 py-2 text-base font-medium text-gray-700 dark:text-white/80 hover:bg-white/20 dark:hover:bg-white/10 hover:text-gray-900 dark:hover:text-white" %>
             <%= link_to "Sign up", new_registration_path,
                   class: "block rounded-md px-3 py-2 text-base font-medium text-white bg-blue-600 hover:bg-blue-700" %>
           <% end %>
@@ -106,7 +106,7 @@
       </div>
     </nav>
 
-    <main class="flex-1">
+    <main class="flex-1 pt-16">
       <!-- Flash messages -->
       <% if flash[:notice] %>
         <div class="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 text-green-800 dark:text-green-200 px-4 py-3 rounded-md mx-4 mt-4" role="alert">

@@ -5,9 +5,11 @@ export default class extends Controller {
 
   connect() {
     this.expanded = false
+    console.log("Mobile menu controller connected", this.element)
   }
 
   toggle() {
+    console.log("Mobile menu toggle clicked")
     this.expanded = !this.expanded
 
     // Update aria-expanded on the button
@@ -19,8 +21,10 @@ export default class extends Controller {
     // Toggle menu visibility
     if (this.expanded) {
       this.menuTarget.classList.remove('hidden')
+      console.log("Menu opened")
     } else {
       this.menuTarget.classList.add('hidden')
+      console.log("Menu closed")
     }
 
     // Toggle icons
