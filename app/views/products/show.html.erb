@@ -254,6 +254,12 @@ document.addEventListener('DOMContentLoaded', function() {
   const ctx = document.getElementById('priceChart');
   if (!ctx) return;
 
+  // Destroy any existing chart on this canvas
+  const existingChart = Chart.getChart(ctx);
+  if (existingChart) {
+    existingChart.destroy();
+  }
+
   // Prepare data for Chart.js
   const priceData = <%= raw @price_histories.map.with_index { |ph, index|
     {
@@ -271,7 +277,8 @@ document.addEventListener('DOMContentLoaded', function() {
   const gridColor = isDarkMode ? '#374151' : '#E5E7EB';
   const pointBorderColor = isDarkMode ? '#1F2937' : '#FFFFFF';
 
-  const chart = new Chart(ctx, {
+  try {
+    const chart = new Chart(ctx, {
     type: 'line',
     data: {
       labels: labels,
@@ -352,32 +359,36 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   });
 
-  // Update chart colors when dark mode changes
-  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function(e) {
-    const newTextColor = e.matches ? '#F3F4F6' : '#374151';
-    const newGridColor = e.matches ? '#374151' : '#E5E7EB';
-    const newPointBorderColor = e.matches ? '#1F2937' : '#FFFFFF';
+    // Update chart colors when dark mode changes
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function(e) {
+      const newTextColor = e.matches ? '#F3F4F6' : '#374151';
+      const newGridColor = e.matches ? '#374151' : '#E5E7EB';
+      const newPointBorderColor = e.matches ? '#1F2937' : '#FFFFFF';
 
-    // Update scales
-    chart.options.scales.x.grid.color = newGridColor;
-    chart.options.scales.x.grid.borderColor = newGridColor;
-    chart.options.scales.x.ticks.color = newTextColor;
-    chart.options.scales.y.grid.color = newGridColor;
-    chart.options.scales.y.grid.borderColor = newGridColor;
-    chart.options.scales.y.ticks.color = newTextColor;
+      // Update scales
+      chart.options.scales.x.grid.color = newGridColor;
+      chart.options.scales.x.grid.borderColor = newGridColor;
+      chart.options.scales.x.ticks.color = newTextColor;
+      chart.options.scales.y.grid.color = newGridColor;
+      chart.options.scales.y.grid.borderColor = newGridColor;
+      chart.options.scales.y.ticks.color = newTextColor;
 
-    // Update data point colors
-    chart.data.datasets[0].pointBorderColor = newPointBorderColor;
-    chart.data.datasets[0].pointHoverBorderColor = newPointBorderColor;
+      // Update data point colors
+      chart.data.datasets[0].pointBorderColor = newPointBorderColor;
+      chart.data.datasets[0].pointHoverBorderColor = newPointBorderColor;
 
-    // Update tooltip colors
-    chart.options.plugins.tooltip.backgroundColor = e.matches ? '#1F2937' : '#FFFFFF';
-    chart.options.plugins.tooltip.titleColor = newTextColor;
-    chart.options.plugins.tooltip.bodyColor = newTextColor;
-    chart.options.plugins.tooltip.borderColor = newGridColor;
+      // Update tooltip colors
+      chart.options.plugins.tooltip.backgroundColor = e.matches ? '#1F2937' : '#FFFFFF';
+      chart.options.plugins.tooltip.titleColor = newTextColor;
+      chart.options.plugins.tooltip.bodyColor = newTextColor;
+      chart.options.plugins.tooltip.borderColor = newGridColor;
 
-    chart.update();
-  });
+      chart.update();
+    });
+
+  } catch (error) {
+    console.error('Error creating price history chart:', error);
+  }
 });
 </script>
 <% end %>

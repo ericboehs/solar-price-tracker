@@ -2,8 +2,8 @@ require "test_helper"
 
 class AuthenticationTest < ActionDispatch::IntegrationTest
   setup do
-    @user = User.create!(email_address: "test@example.com", password: "password123")
-    @admin = User.create!(email_address: "admin@example.com", password: "password123", admin: true)
+    @user = User.create!(email_address: "test_integration@example.com", password: "password123")
+    @admin = User.create!(email_address: "admin_integration@example.com", password: "password123", admin: true)
   end
 
   test "should redirect unauthenticated user from root to welcome" do

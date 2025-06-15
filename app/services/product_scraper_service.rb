@@ -4,16 +4,20 @@ require "open-uri"
 class ProductScraperService
   BASE_URL = "https://signaturesolar.com"
 
-  def initialize(search_url, debug: false, exclude_bundles: true)
+  def initialize(search_url = nil, debug: false, exclude_bundles: true, omit_terms: [])
     @search_url = search_url
     @scraped_products = []
     @debug = debug
     @exclude_bundles = exclude_bundles
+    @omit_terms = Array(omit_terms).map(&:downcase)
   end
 
-  def scrape
-    debug_log "Starting scrape of: #{@search_url}"
-    page = fetch_page(@search_url)
+  def scrape(url = nil)
+    url ||= @search_url
+    raise ArgumentError, "No URL provided" unless url
+
+    debug_log "Starting scrape of: #{url}"
+    page = fetch_page(url)
     return [] unless page
 
     debug_log "Page fetched successfully, title: #{page.title}"
@@ -50,8 +54,8 @@ class ProductScraperService
   def extract_products(page)
     products = []
 
-    # Try multiple selectors for different site structures
-    selectors = [ ".product", ".product-item", ".woocommerce ul.products li.product" ]
+    # Updated selectors for SignatureSolar.com BigCommerce structure
+    selectors = [ ".card", ".product", ".product-item", ".woocommerce ul.products li.product" ]
 
     selectors.each do |selector|
       elements = page.css(selector)
@@ -69,6 +73,9 @@ class ProductScraperService
             # Check if we should exclude bundles/kits
             if @exclude_bundles && is_bundle_or_kit?(product_data[:title])
               debug_log "    ✗ Skipped bundle/kit: #{product_data[:title]}"
+            # Check if product contains any omit terms
+            elsif should_omit_product?(product_data[:title])
+              debug_log "    ✗ Skipped due to omit terms: #{product_data[:title]}"
             else
               products << product_data
               debug_log "    ✓ Added valid product: #{product_data[:title]}"
@@ -87,12 +94,12 @@ class ProductScraperService
   def extract_product_data(element)
     data = {}
 
-    # Extract title with multiple selector fallbacks (updated for BigCommerce)
-    title_element = element.at_css(".card-title, h4, .woocommerce-loop-product__title, h3 a, h2 a, .product-title a, .product-name a")
+    # Extract title - updated for SignatureSolar BigCommerce structure
+    title_element = element.at_css("h4.card-title a, .card-title, h4, .woocommerce-loop-product__title, h3 a, h2 a, .product-title a, .product-name a")
     data[:title] = title_element&.text&.strip
 
-    # Extract URL (updated for BigCommerce)
-    link_element = element.at_css("a[href*='eg4'], a[href*='product'], a.woocommerce-LoopProduct-link, h3 a, h2 a, .product-title a, .product-name a")
+    # Extract URL - updated for SignatureSolar BigCommerce structure
+    link_element = element.at_css("h4.card-title a, a[href*='eg4'], a[href*='product'], a.woocommerce-LoopProduct-link, h3 a, h2 a, .product-title a, .product-name a")
     if link_element
       href = link_element["href"]
       data[:url] = href.start_with?("http") ? href : "#{BASE_URL}#{href}"
@@ -102,8 +109,8 @@ class ProductScraperService
     price_text = extract_price_text(element)
     data[:price] = parse_price(price_text) if price_text
 
-    # Extract image URL
-    img_element = element.at_css("img")
+    # Extract image URL - updated for SignatureSolar BigCommerce structure
+    img_element = element.at_css(".card-image, img")
     if img_element
       src = img_element["src"] || img_element["data-src"]
       data[:image_url] = src if src && !src.include?("placeholder")
@@ -113,14 +120,16 @@ class ProductScraperService
   end
 
   def extract_price_text(element)
-    # Try BigCommerce price structure first
+    # Updated price selectors for SignatureSolar BigCommerce structure
     price_selectors = [
-      ".price ins .woocommerce-Price-amount", # WooCommerce sale price
-      ".price .woocommerce-Price-amount",     # WooCommerce regular price
-      ".price",                               # Generic price element
-      ".card-price",                          # BigCommerce card price
-      ".money",                               # Generic money element
-      "[data-test-id*='price']"               # Data attribute price
+      "span[data-product-price-without-tax]",     # Primary price selector for SignatureSolar
+      "span[data-product-sale-price-without-tax]", # Sale price if available
+      ".price ins .woocommerce-Price-amount",     # WooCommerce sale price
+      ".price .woocommerce-Price-amount",         # WooCommerce regular price
+      ".price",                                   # Generic price element
+      ".card-price",                              # BigCommerce card price
+      ".money",                                   # Generic money element
+      "[data-test-id*='price']"                   # Data attribute price
     ]
 
     price_selectors.each do |selector|
@@ -216,5 +225,12 @@ class ProductScraperService
 
     title_lower = title.downcase
     bundle_keywords.any? { |keyword| title_lower.include?(keyword) }
+  end
+
+  def should_omit_product?(title)
+    return false if @omit_terms.empty? || title.blank?
+
+    title_lower = title.downcase
+    @omit_terms.any? { |term| title_lower.include?(term) }
   end
 end

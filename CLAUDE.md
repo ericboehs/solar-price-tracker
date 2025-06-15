@@ -190,7 +190,7 @@ Core service for web scraping:
 
 1. Check page HTML structure for changes
 2. Verify CSS selectors in browser console
-3. Test with `rails console` using service directly
+3. Test with `rails runner` instead of `rails console` using service directly
 4. Review logs for error patterns
 5. Update selectors as needed
 
@@ -212,7 +212,7 @@ Core service for web scraping:
 
 ### Development Tools
 
-- `bin/dev` - Starts Rails server + Solid Queue
+- `bin/dev` - Starts Rails server (Solid Queue runs automatically with Puma)
 - `rails console` - Interactive Ruby session
 - `rails db` - Direct database access
 - `rails routes` - View all application routes

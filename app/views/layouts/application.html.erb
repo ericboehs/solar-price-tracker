@@ -48,6 +48,10 @@
             <% if authenticated? %>
               <%= link_to "Products", products_path,
                     class: "rounded-md px-3 py-2 text-sm font-medium text-white/80 hover:bg-white/10 hover:text-white transition-colors" %>
+              <% if admin? %>
+                <%= link_to "Watches", admin_watches_path,
+                      class: "rounded-md px-3 py-2 text-sm font-medium text-white/80 hover:bg-white/10 hover:text-white transition-colors" %>
+              <% end %>
               <span class="flex items-center px-3 py-2 text-sm font-medium text-white/80">
                 <%= current_user.email_address %>
                 <% if admin? %>
@@ -93,6 +97,10 @@
           <% if authenticated? %>
             <%= link_to "Products", products_path,
                   class: "block rounded-md px-3 py-2 text-base font-medium text-gray-700 dark:text-white/80 hover:bg-white/20 dark:hover:bg-white/10 hover:text-gray-900 dark:hover:text-white" %>
+            <% if admin? %>
+              <%= link_to "Watches", admin_watches_path,
+                    class: "block rounded-md px-3 py-2 text-base font-medium text-gray-700 dark:text-white/80 hover:bg-white/20 dark:hover:bg-white/10 hover:text-gray-900 dark:hover:text-white" %>
+            <% end %>
             <div class="px-3 py-2 text-sm text-gray-700 dark:text-white/80">
               Signed in as <%= current_user.email_address %>
               <% if admin? %>

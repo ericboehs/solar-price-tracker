@@ -1,4 +1,8 @@
 Rails.application.routes.draw do
+  namespace :admin do
+    resources :watches
+    post "watches/:id/scrape", to: "watches#scrape", as: :scrape_watch
+  end
   resource :session
   resources :passwords, param: :token
   resources :registrations, only: [ :new, :create ]

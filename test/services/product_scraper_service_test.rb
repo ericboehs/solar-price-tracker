@@ -451,4 +451,67 @@ class ProductScraperServiceTest < ActiveSupport::TestCase
     assert skip_message, "Expected bundle skip debug message"
     assert_includes skip_message, "EG4 Solar Kit Bundle"
   end
+
+  test "should log debug message when skipping due to omit terms" do
+    service = ProductScraperService.new("https://example.com", debug: true, omit_terms: [ "refurbished" ])
+
+    # Create HTML with a product containing omit term
+    omit_html = <<~HTML
+      <div class="woocommerce">
+        <ul class="products">
+          <li class="product">
+            <a href="https://signaturesolar.com/refurbished-battery/" class="woocommerce-LoopProduct-link">
+              <h2 class="woocommerce-loop-product__title">Refurbished EG4 Battery</h2>
+              <span class="price">
+                <span class="woocommerce-Price-amount">$999.99</span>
+              </span>
+            </a>
+          </li>
+        </ul>
+      </div>
+    HTML
+
+    page = Nokogiri::HTML(omit_html)
+    service.expects(:fetch_page).returns(page)
+
+    # Capture debug output
+    debug_output = []
+    service.expects(:debug_log).at_least(1).with { |msg| debug_output << msg; true }
+
+    service.scrape
+
+    # Verify omit terms skip message was logged
+    skip_message = debug_output.find { |msg| msg.include?("Skipped due to omit terms") }
+    assert skip_message, "Expected omit terms skip debug message"
+    assert_includes skip_message, "Refurbished EG4 Battery"
+  end
+
+  test "should_omit_product should handle blank titles" do
+    service = ProductScraperService.new("https://example.com", omit_terms: [ "test" ])
+
+    assert_not service.send(:should_omit_product?, "")
+    assert_not service.send(:should_omit_product?, nil)
+  end
+
+  test "should_omit_product should match terms case insensitively" do
+    service = ProductScraperService.new("https://example.com", omit_terms: [ "Refurbished" ])
+
+    assert service.send(:should_omit_product?, "refurbished battery")
+    assert service.send(:should_omit_product?, "REFURBISHED BATTERY")
+    assert service.send(:should_omit_product?, "Refurbished Battery")
+    assert_not service.send(:should_omit_product?, "fresh battery")
+  end
+
+  test "fetch_page should handle network errors" do
+    service = ProductScraperService.new("https://example.com")
+
+    # Mock URI.open to raise a network error
+    URI.expects(:open).raises(SocketError.new("Network unreachable"))
+
+    # Should return nil and log error
+    Rails.logger.expects(:error).with("Failed to fetch page https://example.com: Network unreachable")
+
+    result = service.send(:fetch_page, "https://example.com")
+    assert_nil result
+  end
 end

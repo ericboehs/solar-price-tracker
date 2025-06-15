@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_06_15_055439) do
+ActiveRecord::Schema[8.0].define(version: 2025_06_15_064806) do
   create_table "price_histories", force: :cascade do |t|
     t.integer "product_id", null: false
     t.decimal "price", precision: 10, scale: 2, null: false
@@ -50,6 +50,27 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_15_055439) do
     t.datetime "updated_at", null: false
     t.boolean "admin", default: false, null: false
     t.index ["email_address"], name: "index_users_on_email_address", unique: true
+  end
+
+  create_table "watches", force: :cascade do |t|
+    t.string "url", null: false
+    t.string "watch_type", default: "search", null: false
+    t.string "name", null: false
+    t.text "description"
+    t.boolean "active", default: true, null: false
+    t.text "omit_terms"
+    t.boolean "exclude_bundles", default: true, null: false
+    t.datetime "last_scraped_at"
+    t.integer "products_found", default: 0
+    t.integer "scrape_count", default: 0
+    t.datetime "next_scrape_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["active", "next_scrape_at"], name: "index_watches_on_active_and_next_scrape_at"
+    t.index ["active"], name: "index_watches_on_active"
+    t.index ["last_scraped_at"], name: "index_watches_on_last_scraped_at"
+    t.index ["next_scrape_at"], name: "index_watches_on_next_scrape_at"
+    t.index ["watch_type"], name: "index_watches_on_watch_type"
   end
 
   add_foreign_key "price_histories", "products"

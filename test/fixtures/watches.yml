@@ -1,0 +1,21 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  url: https://signaturesolar.com/search?q=eg4
+  watch_type: search
+  name: EG4 Products
+  description: Watch for EG4 inverters and batteries
+  active: true
+  omit_terms: "refurbished,damaged"
+  exclude_bundles: true
+  last_scraped_at: 2025-06-15 01:48:06
+
+two:
+  url: https://signaturesolar.com/eg4-6000xp/
+  watch_type: product
+  name: EG4 6000XP
+  description: Watch specific EG4 6000XP product
+  active: false
+  omit_terms: ""
+  exclude_bundles: false
+  last_scraped_at: 2025-06-15 01:48:06

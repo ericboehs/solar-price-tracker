@@ -2,8 +2,8 @@ require "test_helper"
 
 class AdminControllerTest < ActionDispatch::IntegrationTest
   setup do
-    @user = User.create!(email_address: "test@example.com", password: "password123")
-    @admin = User.create!(email_address: "admin@example.com", password: "password123", admin: true)
+    @user = User.create!(email_address: "test_admin_controller@example.com", password: "password123")
+    @admin = User.create!(email_address: "admin_admin_controller@example.com", password: "password123", admin: true)
   end
 
   test "should redirect non-admin users" do
