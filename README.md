@@ -18,39 +18,40 @@ A Rails application for tracking prices of solar equipment from various e-commer
 - Nokogiri for web scraping
 - Solid Queue for background jobs
 - Stimulus for interactive UI components
+- SimpleCov for code coverage tracking (95% minimum)
 
 ## Setup
 
 1. **Clone the repository**
-   ```bash
-   git clone https://github.com/ericboehs/solar-price-tracker.git
-   cd solar-price-tracker
-   ```
+  ```bash
+  git clone https://github.com/ericboehs/solar-price-tracker.git
+  cd solar-price-tracker
+  ```
 
 2. **Install dependencies**
-   ```bash
-   bundle install
-   ```
+  ```bash
+  bundle install
+  ```
 
 3. **Setup database**
-   ```bash
-   rails db:create
-   rails db:migrate
-   rails db:seed # Optional: loads sample data
-   ```
+  ```bash
+  rails db:create
+  rails db:migrate
+  rails db:seed # Optional: loads sample data
+  ```
 
 4. **Configure environment variables**
-   ```bash
-   cp .env.example .env
-   # Edit .env with your configuration
-   ```
+  ```bash
+  cp .env.example .env
+  # Edit .env with your configuration
+  ```
 
 5. **Start the application**
-   ```bash
-   bin/dev
-   ```
+  ```bash
+  bin/dev
+  ```
 
-   This starts both the Rails server and Solid Queue for background jobs.
+  This starts both the Rails server and Solid Queue for background jobs.
 
 ## Usage
 
@@ -90,6 +91,15 @@ rails test:system
 ```bash
 bin/rubocop
 bin/brakeman
+```
+
+### Code Coverage
+
+The project uses SimpleCov with a 95% coverage requirement. Coverage reports are generated automatically when running tests:
+
+```bash
+rails test
+# Coverage report available at coverage/index.html
 ```
 
 ### Background Jobs
@@ -132,13 +142,22 @@ Configure in `config/recurring.yml`.
 
 1. Fork the repository
 2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+3. Commit your changes using [Conventional Commits](https://www.conventionalcommits.org/):
+  - `feat:` for new features
+  - `fix:` for bug fixes
+  - `docs:` for documentation changes
+  - `style:` for formatting changes
+  - `refactor:` for code refactoring
+  - `test:` for adding tests
+  - `chore:` for maintenance tasks
+   
+  Example: `git commit -m 'feat: add price alert notifications'`
 4. Push to the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
 
 ## License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+This project is licensed under the [MIT License](https://opensource.org/licenses/MIT).
 
 ## Acknowledgments
 

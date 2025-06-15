@@ -19,19 +19,19 @@ The primary feature is web scraping of SignatureSolar.com to extract:
 Key models and their relationships:
 
 1. **Product** - Represents a solar equipment item
-   - Uses URL slug as unique identifier
-   - Tracks current and historical prices
-   - Provides price trend analytics
+  - Uses URL slug as unique identifier
+  - Tracks current and historical prices
+  - Provides price trend analytics
 
 2. **PriceHistory** - Records price changes over time
-   - Links to Product via foreign key
-   - Captures price at specific timestamps
-   - Enables trend analysis
+  - Links to Product via foreign key
+  - Captures price at specific timestamps
+  - Enables trend analysis
 
 3. **Watch** - Monitors URLs for new products/price changes
-   - Polymorphic design (can watch various resources)
-   - Supports search URLs and individual products
-   - Includes filtering capabilities (omit terms, exclude bundles)
+  - Polymorphic design (can watch various resources)
+  - Supports search URLs and individual products
+  - Includes filtering capabilities (omit terms, exclude bundles)
 
 ### Background Processing
 
@@ -49,6 +49,38 @@ Uses Solid Queue for job processing:
 - Keep controllers thin, models focused
 - Write descriptive method names
 
+### Commit Messages
+
+This project follows [Conventional Commits](https://www.conventionalcommits.org/) specification:
+
+```
+<type>[optional scope]: <description>
+
+[optional body]
+
+[optional footer(s)]
+```
+
+**Types:**
+- `feat:` New feature
+- `fix:` Bug fix
+- `docs:` Documentation only changes
+- `style:` Code style changes (formatting, missing semi-colons, etc)
+- `refactor:` Code change that neither fixes a bug nor adds a feature
+- `perf:` Performance improvements
+- `test:` Adding missing tests or correcting existing tests
+- `build:` Changes that affect the build system or external dependencies
+- `ci:` Changes to CI configuration files and scripts
+- `chore:` Other changes that don't modify src or test files
+
+**Examples:**
+```bash
+git commit -m "feat: add price drop email notifications"
+git commit -m "fix: handle empty product titles in scraper"
+git commit -m "docs: update API endpoint documentation"
+git commit -m "refactor: extract price parsing logic to service"
+```
+
 ### Testing
 
 Run tests with:
@@ -57,12 +89,27 @@ rails test
 rails test:system
 ```
 
-### Linting
+### Code Coverage
+
+The project enforces comprehensive test coverage using SimpleCov:
+- **Minimum coverage**: 95% overall
+- **Per-file minimum**: 80%
+- **Branch coverage**: Enabled
+- **Coverage reports**: Generated in `coverage/` directory
+- **CI integration**: Coverage reports uploaded as artifacts
+
+Coverage configuration in `.simplecov`:
+- Excludes test files, config, vendor, and database files
+- Groups results by component type (Controllers, Models, Services, etc.)
+- Fails CI if coverage drops below thresholds
+
+### Linting & Quality Checks
 
 Check code quality:
 ```bash
-bin/rubocop
-bin/brakeman
+bin/rubocop      # Ruby style guide compliance
+bin/brakeman     # Security vulnerability scanning
+rails test       # Runs tests with coverage report
 ```
 
 ### Database
