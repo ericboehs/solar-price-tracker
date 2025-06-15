@@ -62,6 +62,100 @@ if Rails.env.development?
   end
 
   puts "Sample products created! Total: #{Product.count}"
+
+  # Create price history data for interesting charts
+  puts "Creating price history data..."
+
+  # Product 1: EG4 LifePower4 V2 24V - Price trending down over time
+  product1 = Product.find_by(slug: "eg4-lifepower4-v2-24v-200ah-server-rack-battery")
+  if product1 && product1.price_histories.empty?
+    price_data_1 = [
+      { price: 1599.95, date: 30.days.ago },
+      { price: 1549.95, date: 25.days.ago },
+      { price: 1499.95, date: 20.days.ago },
+      { price: 1449.95, date: 15.days.ago },
+      { price: 1399.95, date: 10.days.ago },
+      { price: 1399.95, date: 5.days.ago },
+      { price: 1399.95, date: 1.day.ago }
+    ]
+
+    price_data_1.each do |data|
+      product1.price_histories.create!(price: data[:price], recorded_at: data[:date])
+    end
+    puts "  📈 Added #{price_data_1.length} price points for #{product1.title}"
+  end
+
+  # Product 2: EG4 LL-S Battery - Price with some volatility
+  product2 = Product.find_by(slug: "eg4-ll-s-lithium-battery-48v-100ah-server-rack-battery-ul1973-ul9540a-10-year-warranty")
+  if product2 && product2.price_histories.empty?
+    price_data_2 = [
+      { price: 1399.95, date: 25.days.ago },
+      { price: 1449.95, date: 20.days.ago },
+      { price: 1399.95, date: 18.days.ago },
+      { price: 1499.95, date: 15.days.ago },
+      { price: 1529.95, date: 12.days.ago },
+      { price: 1499.95, date: 8.days.ago },
+      { price: 1499.95, date: 3.days.ago }
+    ]
+
+    price_data_2.each do |data|
+      product2.price_histories.create!(price: data[:price], recorded_at: data[:date])
+    end
+    puts "  📈 Added #{price_data_2.length} price points for #{product2.title}"
+  end
+
+  # Product 3: EG4 LifePower4 V2 48V - Recent price drop to historical low
+  product3 = Product.find_by(slug: "eg4-lifepower4-v2-lithium-battery-48v-100ah-server-rack-battery-ul1973-ul9540a-10-year-warranty")
+  if product3 && product3.price_histories.empty?
+    price_data_3 = [
+      { price: 1599.95, date: 20.days.ago },
+      { price: 1549.95, date: 15.days.ago },
+      { price: 1499.95, date: 12.days.ago },
+      { price: 1449.95, date: 8.days.ago },
+      { price: 1399.95, date: 2.days.ago }
+    ]
+
+    price_data_3.each do |data|
+      product3.price_histories.create!(price: data[:price], recorded_at: data[:date])
+    end
+    puts "  📈 Added #{price_data_3.length} price points for #{product3.title}"
+  end
+
+  # Product 4: EG4 WallMount Indoor - Steady price with recent increase
+  product4 = Product.find_by(slug: "eg4-wallmount-indoor-battery-48v-280ah-14-3kwh-indoor-heated-ul1973-ul9540a-10-year-warranty")
+  if product4 && product4.price_histories.empty?
+    price_data_4 = [
+      { price: 3599.95, date: 14.days.ago },
+      { price: 3599.95, date: 10.days.ago },
+      { price: 3649.95, date: 7.days.ago },
+      { price: 3699.95, date: 3.days.ago }
+    ]
+
+    price_data_4.each do |data|
+      product4.price_histories.create!(price: data[:price], recorded_at: data[:date])
+    end
+    puts "  📈 Added #{price_data_4.length} price points for #{product4.title}"
+  end
+
+  # Product 5: EG4 WallMount All Weather - Price trending up
+  product5 = Product.find_by(slug: "eg4-wallmount-all-weather-lithium-battery-48v-280ah-14-3kwh-lifepo4-all-weather-energy-storage-ul1973-ul9540a-10-year-warranty")
+  if product5 && product5.price_histories.empty?
+    price_data_5 = [
+      { price: 3899.95, date: 21.days.ago },
+      { price: 3949.95, date: 18.days.ago },
+      { price: 3999.95, date: 14.days.ago },
+      { price: 4049.95, date: 10.days.ago },
+      { price: 4099.95, date: 6.days.ago },
+      { price: 4099.95, date: 2.days.ago }
+    ]
+
+    price_data_5.each do |data|
+      product5.price_histories.create!(price: data[:price], recorded_at: data[:date])
+    end
+    puts "  📈 Added #{price_data_5.length} price points for #{product5.title}"
+  end
+
+  puts "Price history data created! Total price points: #{PriceHistory.count}"
 end
 
 # Create admin user in development only

@@ -174,6 +174,46 @@
           <% end %>
         </div>
 
+        <!-- Price History Chart -->
+        <% if @price_histories.any? %>
+          <div class="mt-10">
+            <h3 class="text-sm font-medium text-gray-900 dark:text-white">Price History</h3>
+
+            <div class="mt-4 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
+              <div class="mb-4 flex items-center justify-between">
+                <div>
+                  <p class="text-sm text-gray-600 dark:text-gray-400">
+                    <%= @price_histories.count %> price point<%= 's' if @price_histories.count != 1 %> recorded
+                  </p>
+                  <% if @product.price_trend_30_days %>
+                    <% trend = @product.price_trend_30_days %>
+                    <p class="text-sm <%= trend[:direction] == :up ? 'text-red-600 dark:text-red-400' : 'text-green-600 dark:text-green-400' %>">
+                      <%= trend[:direction] == :up ? '↗' : '↘' %>
+                      <%= trend[:percentage] > 0 ? '+' : '' %><%= trend[:percentage] %>%
+                      (<%= trend[:change] > 0 ? '+' : '' %>$<%= '%.2f' % trend[:change] %>) over 30 days
+                    </p>
+                  <% end %>
+                </div>
+                <div class="text-right">
+                  <p class="text-sm text-gray-600 dark:text-gray-400">Historical Low</p>
+                  <p class="text-lg font-semibold text-gray-900 dark:text-white">
+                    $<%= '%.2f' % @product.historical_low_price %>
+                    <% if @product.at_historical_low? %>
+                      <span class="ml-1 inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300">
+                        Current Low
+                      </span>
+                    <% end %>
+                  </p>
+                </div>
+              </div>
+
+              <div class="relative h-64">
+                <canvas id="priceChart"></canvas>
+              </div>
+            </div>
+          </div>
+        <% end %>
+
         <!-- Product details -->
         <div class="mt-10">
           <h3 class="text-sm font-medium text-gray-900 dark:text-white">Product Information</h3>
@@ -207,3 +247,137 @@
     </div>
   </div>
 </div>
+
+<% if @price_histories.any? %>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const ctx = document.getElementById('priceChart');
+  if (!ctx) return;
+
+  // Prepare data for Chart.js
+  const priceData = <%= raw @price_histories.map.with_index { |ph, index|
+    {
+      x: index,
+      y: ph.price.to_f,
+      date: ph.recorded_at.strftime('%m/%d/%Y')
+    }
+  }.to_json %>;
+
+  const labels = <%= raw @price_histories.map { |ph| ph.recorded_at.strftime('%m/%d') }.to_json %>;
+
+  // Detect dark mode
+  const isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  const textColor = isDarkMode ? '#F3F4F6' : '#374151';
+  const gridColor = isDarkMode ? '#374151' : '#E5E7EB';
+  const pointBorderColor = isDarkMode ? '#1F2937' : '#FFFFFF';
+
+  const chart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: labels,
+      datasets: [{
+        label: 'Price ($)',
+        data: priceData.map(point => point.y),
+        borderColor: '#EA580C', // Orange-600
+        backgroundColor: 'rgba(234, 88, 12, 0.1)',
+        borderWidth: 2,
+        fill: true,
+        tension: 0.4,
+        pointBackgroundColor: '#EA580C',
+        pointBorderColor: pointBorderColor,
+        pointBorderWidth: 2,
+        pointRadius: 4,
+        pointHoverRadius: 6,
+        pointHoverBackgroundColor: '#EA580C',
+        pointHoverBorderColor: pointBorderColor,
+        pointHoverBorderWidth: 2
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: {
+        intersect: false,
+        mode: 'index'
+      },
+      plugins: {
+        legend: {
+          display: false
+        },
+        tooltip: {
+          backgroundColor: isDarkMode ? '#1F2937' : '#FFFFFF',
+          titleColor: textColor,
+          bodyColor: textColor,
+          borderColor: gridColor,
+          borderWidth: 1,
+          cornerRadius: 8,
+          padding: 12,
+          displayColors: false,
+          callbacks: {
+            title: function(context) {
+              const index = context[0].dataIndex;
+              return priceData[index] ? priceData[index].date : labels[index];
+            },
+            label: function(context) {
+              return '$' + context.parsed.y.toFixed(2);
+            }
+          }
+        }
+      },
+      scales: {
+        x: {
+          grid: {
+            color: gridColor,
+            borderColor: gridColor
+          },
+          ticks: {
+            color: textColor,
+            maxTicksLimit: 6
+          }
+        },
+        y: {
+          beginAtZero: false,
+          grid: {
+            color: gridColor,
+            borderColor: gridColor
+          },
+          ticks: {
+            color: textColor,
+            callback: function(value) {
+              return '$' + value.toFixed(2);
+            }
+          }
+        }
+      }
+    }
+  });
+
+  // Update chart colors when dark mode changes
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function(e) {
+    const newTextColor = e.matches ? '#F3F4F6' : '#374151';
+    const newGridColor = e.matches ? '#374151' : '#E5E7EB';
+    const newPointBorderColor = e.matches ? '#1F2937' : '#FFFFFF';
+
+    // Update scales
+    chart.options.scales.x.grid.color = newGridColor;
+    chart.options.scales.x.grid.borderColor = newGridColor;
+    chart.options.scales.x.ticks.color = newTextColor;
+    chart.options.scales.y.grid.color = newGridColor;
+    chart.options.scales.y.grid.borderColor = newGridColor;
+    chart.options.scales.y.ticks.color = newTextColor;
+
+    // Update data point colors
+    chart.data.datasets[0].pointBorderColor = newPointBorderColor;
+    chart.data.datasets[0].pointHoverBorderColor = newPointBorderColor;
+
+    // Update tooltip colors
+    chart.options.plugins.tooltip.backgroundColor = e.matches ? '#1F2937' : '#FFFFFF';
+    chart.options.plugins.tooltip.titleColor = newTextColor;
+    chart.options.plugins.tooltip.bodyColor = newTextColor;
+    chart.options.plugins.tooltip.borderColor = newGridColor;
+
+    chart.update();
+  });
+});
+</script>
+<% end %>

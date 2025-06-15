@@ -41,10 +41,36 @@
                   Updated <%= time_ago_in_words(product.last_scraped_at) %> ago
                 </p>
               <% end %>
+
+              <!-- Price Statistics -->
+              <% if product.price_histories.any? %>
+                <div class="mt-1 flex flex-wrap gap-1">
+                  <% if product.at_historical_low? %>
+                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300">
+                      🔥 Historical Low
+                    </span>
+                  <% end %>
+
+                  <% if product.price_trend_30_days %>
+                    <% trend = product.price_trend_30_days %>
+                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium <%= trend[:direction] == :up ? 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300' : 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300' %>">
+                      <%= trend[:direction] == :up ? '↗' : '↘' %>
+                      <%= trend[:percentage] > 0 ? '+' : '' %><%= trend[:percentage] %>%
+                    </span>
+                  <% end %>
+                </div>
+              <% end %>
             </div>
-            <p class="text-sm font-medium text-gray-900 dark:text-white">
-              <%= product.display_price %>
-            </p>
+            <div class="text-right">
+              <p class="text-sm font-medium text-gray-900 dark:text-white">
+                <%= product.display_price %>
+              </p>
+              <% if product.price_histories.any? %>
+                <p class="text-xs text-gray-500 dark:text-gray-400">
+                  Low: $<%= '%.2f' % product.historical_low_price %>
+                </p>
+              <% end %>
+            </div>
           </div>
           <div class="mt-2">
             <%= link_to "View Details", product_path(product.slug),

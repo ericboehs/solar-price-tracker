@@ -153,4 +153,86 @@ class ProductTest < ActiveSupport::TestCase
     assert_includes needs_scraping, old_scraped
     assert_not_includes needs_scraping, recently_scraped
   end
+
+  test "should have many price_histories" do
+    product = products(:battery_48v)
+    assert_respond_to product, :price_histories
+    assert_equal 2, product.price_histories.count
+  end
+
+  test "latest_price_history should return most recent price history" do
+    product = products(:battery_48v)
+    latest = product.latest_price_history
+    assert_equal price_histories(:battery_price_drop), latest
+  end
+
+  test "price_trend_30_days should calculate trend over 30 days" do
+    product = products(:battery_48v)
+    trend = product.price_trend_30_days
+
+    assert_not_nil trend
+    assert_equal -100.00, trend[:change]
+    assert_in_delta -7.69, trend[:percentage], 0.01
+    assert_equal :down, trend[:direction]
+  end
+
+  test "price_trend_30_days should return nil with insufficient data" do
+    product = products(:inverter_6000w)
+    trend = product.price_trend_30_days
+    assert_nil trend
+  end
+
+  test "historical_low_price should return lowest price from history" do
+    product = products(:battery_48v)
+    assert_equal 1199.99, product.historical_low_price
+  end
+
+  test "historical_low_price should fallback to current price if no history" do
+    product = Product.new(@valid_attributes.merge(price: 999.99))
+    assert_equal 999.99, product.historical_low_price
+  end
+
+  test "at_historical_low? should return true when current price matches historical low" do
+    product = products(:battery_48v)
+    # Record the low price as current
+    product.record_price_change(1199.99)
+    assert product.at_historical_low?
+  end
+
+  test "at_historical_low? should return false when above historical low" do
+    product = products(:battery_48v)
+    # Record a price higher than the historical low
+    product.record_price_change(1399.99)
+    assert_not product.at_historical_low?
+  end
+
+  test "record_price_change should create price history entry" do
+    product = Product.create!(@valid_attributes.merge(
+      url: "https://signaturesolar.com/test-price-change/"
+    ))
+
+    assert_difference "PriceHistory.count", 1 do
+      product.record_price_change(1199.99)
+    end
+
+    history = product.price_histories.last
+    assert_equal 1199.99, history.price
+  end
+
+  test "record_price_change should not record if price change is minimal" do
+    product = Product.create!(@valid_attributes.merge(
+      url: "https://signaturesolar.com/test-minimal-change/",
+      price: 1299.99
+    ))
+
+    # Create initial history
+    product.record_price_change(1299.99)
+    initial_count = product.price_histories.count
+
+    # Try to record a minimal change
+    result = product.record_price_change(1299.98) # Less than $0.01 change
+
+    assert_equal false, result
+    assert_equal initial_count, product.price_histories.count
+  end
 end

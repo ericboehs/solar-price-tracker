@@ -48,7 +48,7 @@ class ProductScraperServiceTest < ActiveSupport::TestCase
 
   test "scrape should extract and create products from valid HTML" do
     # Clear any existing products to get clean count
-    Product.delete_all
+    Product.destroy_all
 
     # Mock successful page fetch
     page = Nokogiri::HTML(@sample_html)
@@ -77,7 +77,7 @@ class ProductScraperServiceTest < ActiveSupport::TestCase
 
   test "scrape should update existing products" do
     # Clear any existing products to avoid conflicts
-    Product.delete_all
+    Product.destroy_all
 
     # Create existing product that matches one in our test HTML
     existing_product = Product.create!(
@@ -218,6 +218,79 @@ class ProductScraperServiceTest < ActiveSupport::TestCase
     assert_equal "Updated Title", existing.title
     assert_equal 149.99, existing.price
     assert_equal "https://example.com/new-image.jpg", existing.image_url
+  end
+
+  test "find_or_create_product should create price history for new products" do
+    product_data = {
+      title: "New Product with Price History",
+      url: "https://signaturesolar.com/new-product-history/",
+      price: 199.99,
+      image_url: "https://example.com/image.jpg"
+    }
+
+    assert_difference "Product.count", 1 do
+      assert_difference "PriceHistory.count", 1 do
+        product = @service.send(:find_or_create_product, product_data)
+        assert_not_nil product
+        assert_equal 1, product.price_histories.count
+        assert_equal 199.99, product.price_histories.first.price
+      end
+    end
+  end
+
+  test "find_or_create_product should create price history when price changes" do
+    existing = Product.create!(
+      title: "Existing Product",
+      url: "https://signaturesolar.com/existing-price-change/",
+      slug: "existing-price-change",
+      price: 99.99
+    )
+
+    # Create initial price history
+    existing.record_price_change(99.99)
+
+    product_data = {
+      title: "Existing Product",
+      url: "https://signaturesolar.com/existing-price-change/",
+      price: 79.99,
+      image_url: "https://example.com/image.jpg"
+    }
+
+    assert_no_difference "Product.count" do
+      assert_difference "PriceHistory.count", 1 do
+        product = @service.send(:find_or_create_product, product_data)
+        assert_equal existing.id, product.id
+        assert_equal 2, product.price_histories.count
+        assert_equal 79.99, product.price_histories.recent_first.first.price
+      end
+    end
+  end
+
+  test "find_or_create_product should not create price history for minimal price changes" do
+    existing = Product.create!(
+      title: "Existing Product",
+      url: "https://signaturesolar.com/existing-minimal-change/",
+      slug: "existing-minimal-change",
+      price: 99.99
+    )
+
+    # Create initial price history
+    existing.record_price_change(99.99)
+
+    product_data = {
+      title: "Existing Product",
+      url: "https://signaturesolar.com/existing-minimal-change/",
+      price: 99.98, # Only 1 cent difference
+      image_url: "https://example.com/image.jpg"
+    }
+
+    assert_no_difference "Product.count" do
+      assert_no_difference "PriceHistory.count" do
+        product = @service.send(:find_or_create_product, product_data)
+        assert_equal existing.id, product.id
+        assert_equal 1, product.price_histories.count
+      end
+    end
   end
 
   # Coverage for L18: @scraped_products << product if product (when product is nil)

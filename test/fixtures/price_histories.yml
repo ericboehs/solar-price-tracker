@@ -1,0 +1,16 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+battery_initial_price:
+  product: battery_48v
+  price: 1299.99
+  recorded_at: <%= 1.week.ago %>
+
+battery_price_drop:
+  product: battery_48v
+  price: 1199.99
+  recorded_at: <%= 3.days.ago %>
+
+inverter_initial_price:
+  product: inverter_6000w
+  price: 1499.99
+  recorded_at: <%= 2.days.ago %>

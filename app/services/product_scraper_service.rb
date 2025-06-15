@@ -158,15 +158,23 @@ class ProductScraperService
     return nil unless slug
 
     product = Product.find_by(slug: slug)
+    scraped_at = Time.current
 
     if product
-      # Update existing product
+      # Update existing product and record price history if changed
+      old_price = product.price
       product.update(
         title: product_data[:title],
         price: product_data[:price],
         image_url: product_data[:image_url],
-        last_scraped_at: Time.current
+        last_scraped_at: scraped_at
       )
+
+      # Record price change if price is different
+      if old_price != product_data[:price]
+        product.record_price_change(product_data[:price], scraped_at)
+        debug_log "    Price changed from $#{old_price} to $#{product_data[:price]}"
+      end
     else
       # Create new product
       product = Product.create(
@@ -175,8 +183,14 @@ class ProductScraperService
         slug: slug,
         price: product_data[:price],
         image_url: product_data[:image_url],
-        last_scraped_at: Time.current
+        last_scraped_at: scraped_at
       )
+
+      # Record initial price history for new products
+      if product.persisted?
+        product.record_price_change(product_data[:price], scraped_at)
+        debug_log "    Recorded initial price: $#{product_data[:price]}"
+      end
     end
 
     product.persisted? ? product : nil

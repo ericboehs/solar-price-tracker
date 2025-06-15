@@ -3,8 +3,8 @@ require "test_helper"
 class ProductsControllerTest < ActionDispatch::IntegrationTest
   def setup
     # Clean up any existing data
-    Product.delete_all
-    User.delete_all
+    Product.destroy_all
+    User.destroy_all
 
     @user = User.create!(email_address: "test@example.com", password: "password123")
     @product = Product.create!(
@@ -135,6 +135,60 @@ class ProductsControllerTest < ActionDispatch::IntegrationTest
 
     # Should only show 50 products (our limit)
     assert_select "div.group", count: 50
+  end
+
+  test "should load price histories for product show page" do
+    sign_in_as @user
+
+    # Add some price history data
+    @product.price_histories.create!(price: 1199.99, recorded_at: 2.days.ago)
+    @product.price_histories.create!(price: 1299.99, recorded_at: 1.day.ago)
+
+    get product_path(@product.slug)
+    assert_response :success
+
+    # Verify price history chart section is rendered when data exists
+    assert_select "h3", "Price History"
+    assert_select "canvas#priceChart"
+    assert_select "p", /2 price points recorded/
+  end
+
+  test "should not show price history chart when no data exists" do
+    sign_in_as @user
+    get product_path(@product.slug)
+    assert_response :success
+
+    # Verify no price history chart is shown when no data
+    assert_select "h3", { text: "Price History", count: 0 }
+    assert_select "canvas#priceChart", { count: 0 }
+  end
+
+  test "should show price statistics on products index" do
+    sign_in_as @user
+
+    # Add price history data to show statistics
+    @product.price_histories.create!(price: 1399.99, recorded_at: 7.days.ago)
+    @product.price_histories.create!(price: 1199.99, recorded_at: 3.days.ago)
+    @product.price_histories.create!(price: 1199.99, recorded_at: 1.day.ago)
+
+    get products_url
+    assert_response :success
+
+    # Verify price statistics are shown
+    assert_select "span", /Historical Low/
+    assert_select "span", /↘.*%/ # Downward trend indicator
+    assert_select "p", /Low: \$1199\.99/
+  end
+
+  test "should not show price statistics when no price history exists" do
+    sign_in_as @user
+
+    get products_url
+    assert_response :success
+
+    # Verify price statistics are not shown when no price history
+    assert_select "span", { text: /Historical Low/, count: 0 }
+    assert_select "p", { text: /Low:/, count: 0 }
   end
 
   private
