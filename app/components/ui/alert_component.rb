@@ -5,7 +5,7 @@ class Ui::AlertComponent < ViewComponent::Base
       icon: "text-green-400"
     },
     error: {
-      container: "bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800 text-red-800 dark:text-red-200", 
+      container: "bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800 text-red-800 dark:text-red-200",
       icon: "text-red-400"
     },
     warning: {
@@ -32,13 +32,13 @@ class Ui::AlertComponent < ViewComponent::Base
   def container_classes
     base_classes = "rounded-md border px-4 py-3"
     variant_classes = VARIANTS.dig(type, :container) || VARIANTS.dig(:info, :container)
-    [base_classes, variant_classes, classes].join(" ")
+    [ base_classes, variant_classes, classes ].join(" ")
   end
 
   def icon_classes
     base_classes = "h-5 w-5"
     variant_classes = VARIANTS.dig(type, :icon) || VARIANTS.dig(:info, :icon)
-    [base_classes, variant_classes].join(" ")
+    [ base_classes, variant_classes ].join(" ")
   end
 
   def icon_path
