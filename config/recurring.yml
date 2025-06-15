@@ -2,10 +2,10 @@ production:
   scrape_watches:
     class: ScrapeWatchesJob
     queue: default
-    schedule: every 30 minutes
+    schedule: every day at 6am
 
 development:
   scrape_watches:
     class: ScrapeWatchesJob
     queue: default
-    schedule: every 5 minutes
+    schedule: every hour
