@@ -1,0 +1,75 @@
+<div class="bg-white dark:bg-gray-900">
+  <div class="mx-auto max-w-2xl px-4 py-16 sm:px-6 sm:py-24 lg:max-w-7xl lg:px-8">
+    <h2 class="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">Solar Equipment Products</h2>
+    <p class="mt-4 text-base text-gray-600 dark:text-gray-300">
+      Latest solar equipment from SignatureSolar.com with real-time pricing and availability.
+    </p>
+
+    <div class="mt-6 grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-4 xl:gap-x-8">
+      <% @products.each do |product| %>
+        <div class="group relative" style="-webkit-tap-highlight-color: transparent;">
+          <div class="aspect-h-1 aspect-w-1 w-full overflow-hidden rounded-md bg-gray-200 dark:bg-gray-600 lg:aspect-none lg:h-80">
+            <% if product.image_url.present? %>
+              <%= image_tag product.image_url,
+                  alt: product.title,
+                  class: "h-full w-full object-cover object-center lg:h-full lg:w-full dark:mix-blend-multiply dark:opacity-90 dark:group-hover:mix-blend-normal dark:group-hover:opacity-100 dark:group-active:mix-blend-normal dark:group-active:opacity-100 group-hover:opacity-75 group-active:opacity-95 transition-all duration-150",
+                  loading: "lazy",
+                  onerror: "this.style.display='none'; this.nextElementSibling.style.display='flex';" %>
+              <div class="hidden h-full w-full items-center justify-center bg-gray-100 dark:bg-gray-800">
+                <svg class="h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+              </div>
+            <% else %>
+              <div class="flex h-full w-full items-center justify-center bg-gray-100 dark:bg-gray-800">
+                <svg class="h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+              </div>
+            <% end %>
+          </div>
+          <div class="mt-4 flex justify-between">
+            <div>
+              <h3 class="text-sm text-gray-700 dark:text-gray-300">
+                <%= link_to product_path(product.slug), class: "hover:text-orange-600 dark:hover:text-orange-400" do %>
+                  <span aria-hidden="true" class="absolute inset-0"></span>
+                  <%= truncate(product.title, length: 60) %>
+                <% end %>
+              </h3>
+              <% if product.last_scraped_at %>
+                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                  Updated <%= time_ago_in_words(product.last_scraped_at) %> ago
+                </p>
+              <% end %>
+            </div>
+            <p class="text-sm font-medium text-gray-900 dark:text-white">
+              <%= product.display_price %>
+            </p>
+          </div>
+          <div class="mt-2">
+            <%= link_to "View Details", product_path(product.slug),
+                class: "inline-flex items-center rounded-md bg-orange-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-orange-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange-600" %>
+            <% if safe_url(product.url) %>
+              <%= link_to "View on SignatureSolar", safe_url(product.url),
+                  target: "_blank",
+                  rel: "noopener noreferrer",
+                  class: "ml-2 inline-flex items-center rounded-md bg-white dark:bg-gray-800 px-3 py-2 text-sm font-semibold text-gray-900 dark:text-white shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700" %>
+            <% end %>
+          </div>
+        </div>
+      <% end %>
+    </div>
+
+    <% if @products.empty? %>
+      <div class="text-center py-12">
+        <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+          <path vector-effect="non-scaling-stroke" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 13h6m-3-3v6m-9 1V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
+        </svg>
+        <h3 class="mt-2 text-sm font-semibold text-gray-900 dark:text-white">No products found</h3>
+        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+          No solar products have been scraped yet. Check back later or contact an administrator.
+        </p>
+      </div>
+    <% end %>
+  </div>
+</div>

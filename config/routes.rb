@@ -3,6 +3,12 @@ Rails.application.routes.draw do
   resources :passwords, param: :token
   resources :registrations, only: [ :new, :create ]
   get "admin", to: "admin#index"
+
+  # Welcome page
+  get "welcome", to: "welcome#index", as: :welcome_index
+
+  # Products routes using slug as param
+  resources :products, only: [ :index, :show ], param: :slug
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 
   # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.
@@ -14,5 +20,5 @@ Rails.application.routes.draw do
   # get "service-worker" => "rails/pwa#service_worker", as: :pwa_service_worker
 
   # Defines the root path route ("/")
-  root "welcome#index"
+  root to: "application#root"
 end

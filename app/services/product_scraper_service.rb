@@ -4,21 +4,36 @@ require "open-uri"
 class ProductScraperService
   BASE_URL = "https://signaturesolar.com"
 
-  def initialize(search_url)
+  def initialize(search_url, debug: false, exclude_bundles: true)
     @search_url = search_url
     @scraped_products = []
+    @debug = debug
+    @exclude_bundles = exclude_bundles
   end
 
   def scrape
+    debug_log "Starting scrape of: #{@search_url}"
     page = fetch_page(@search_url)
     return [] unless page
 
-    extract_products(page).each do |product_data|
+    debug_log "Page fetched successfully, title: #{page.title}"
+
+    product_data_list = extract_products(page)
+    debug_log "Extracted #{product_data_list.length} product data entries"
+
+    product_data_list.each_with_index do |product_data, index|
+      debug_log "Processing product #{index + 1}: #{product_data[:title]}"
       product = find_or_create_product(product_data)
       @scraped_products << product if product
     end
 
+    debug_log "Successfully scraped #{@scraped_products.length} products"
     @scraped_products
+  end
+
+  def debug_scrape
+    @debug = true
+    scrape
   end
 
   private
@@ -35,13 +50,34 @@ class ProductScraperService
   def extract_products(page)
     products = []
 
-    # SignatureSolar product grid items
-    page.css(".product-item, .product, .woocommerce ul.products li.product").each do |product_element|
-      product_data = extract_product_data(product_element)
-      # Only include products with valid data and SignatureSolar URLs
-      if product_data[:url] && product_data[:title] && product_data[:price] &&
-        product_data[:url].include?("signaturesolar.com")
-        products << product_data
+    # Try multiple selectors for different site structures
+    selectors = [ ".product", ".product-item", ".woocommerce ul.products li.product" ]
+
+    selectors.each do |selector|
+      elements = page.css(selector)
+      debug_log "Trying selector '#{selector}': found #{elements.length} elements"
+
+      if elements.any?
+        elements.each_with_index do |product_element, index|
+          product_data = extract_product_data(product_element)
+          debug_log "  Product #{index + 1} data: #{product_data.inspect}"
+
+          # Only include products with valid data and SignatureSolar URLs
+          if product_data[:url] && product_data[:title] && product_data[:price] &&
+            product_data[:url].include?("signaturesolar.com")
+
+            # Check if we should exclude bundles/kits
+            if @exclude_bundles && is_bundle_or_kit?(product_data[:title])
+              debug_log "    ✗ Skipped bundle/kit: #{product_data[:title]}"
+            else
+              products << product_data
+              debug_log "    ✓ Added valid product: #{product_data[:title]}"
+            end
+          else
+            debug_log "    ✗ Skipped invalid product - URL: #{!!product_data[:url]}, Title: #{!!product_data[:title]}, Price: #{!!product_data[:price]}"
+          end
+        end
+        break if products.any? # Use the first selector that finds products
       end
     end
 
@@ -51,12 +87,12 @@ class ProductScraperService
   def extract_product_data(element)
     data = {}
 
-    # Extract title with multiple selector fallbacks
-    title_element = element.at_css(".woocommerce-loop-product__title, h3 a, h2 a, .product-title a, .product-name a")
+    # Extract title with multiple selector fallbacks (updated for BigCommerce)
+    title_element = element.at_css(".card-title, h4, .woocommerce-loop-product__title, h3 a, h2 a, .product-title a, .product-name a")
     data[:title] = title_element&.text&.strip
 
-    # Extract URL
-    link_element = element.at_css("a.woocommerce-LoopProduct-link, h3 a, h2 a, .product-title a, .product-name a")
+    # Extract URL (updated for BigCommerce)
+    link_element = element.at_css("a[href*='eg4'], a[href*='product'], a.woocommerce-LoopProduct-link, h3 a, h2 a, .product-title a, .product-name a")
     if link_element
       href = link_element["href"]
       data[:url] = href.start_with?("http") ? href : "#{BASE_URL}#{href}"
@@ -77,17 +113,31 @@ class ProductScraperService
   end
 
   def extract_price_text(element)
-    # Try sale price first (inside <ins> tag)
-    sale_price = element.at_css(".price ins .woocommerce-Price-amount, .sale-price")
-    return sale_price.text.strip if sale_price
+    # Try BigCommerce price structure first
+    price_selectors = [
+      ".price ins .woocommerce-Price-amount", # WooCommerce sale price
+      ".price .woocommerce-Price-amount",     # WooCommerce regular price
+      ".price",                               # Generic price element
+      ".card-price",                          # BigCommerce card price
+      ".money",                               # Generic money element
+      "[data-test-id*='price']"               # Data attribute price
+    ]
 
-    # Fall back to regular price
-    regular_price = element.at_css(".price .woocommerce-Price-amount, .regular-price")
-    return regular_price.text.strip if regular_price
+    price_selectors.each do |selector|
+      price_element = element.at_css(selector)
+      if price_element
+        text = price_element.text.strip
+        debug_log "    Found price with selector '#{selector}': '#{text}'"
+        return text if text.present? && text.match?(/[\d\$]/)
+      end
+    end
 
-    # Last fallback - any price element
-    any_price = element.at_css(".price")
-    any_price&.text&.strip
+    debug_log "    No price found with any selector"
+    nil
+  end
+
+  def debug_log(message)
+    puts message if @debug
   end
 
   def parse_price(price_text)
@@ -138,5 +188,19 @@ class ProductScraperService
     path_segments.last
   rescue URI::InvalidURIError, ArgumentError
     nil
+  end
+
+  def is_bundle_or_kit?(title)
+    return false unless title
+
+    # Common bundle/kit indicators
+    bundle_keywords = [
+      "bundle", "kit", "system", "package", "combo", "set",
+      "starter kit", "complete kit", "solar kit", "power kit",
+      "off-grid kit", "grid-tie kit", "diy kit", "backup kit"
+    ]
+
+    title_lower = title.downcase
+    bundle_keywords.any? { |keyword| title_lower.include?(keyword) }
   end
 end

@@ -328,4 +328,54 @@ class ProductScraperServiceTest < ActiveSupport::TestCase
     result = @service.send(:find_or_create_product, product_data)
     assert_nil result
   end
+
+  # Coverage for L35-36: debug_scrape method
+  test "debug_scrape should enable debug mode and call scrape" do
+    service = ProductScraperService.new("https://example.com", debug: false)
+
+    # Mock scrape to avoid network calls
+    service.expects(:scrape).returns([])
+
+    result = service.debug_scrape
+
+    # Verify debug was enabled
+    assert service.instance_variable_get(:@debug)
+    assert_equal [], result
+  end
+
+
+  # Coverage for L71: bundle exclusion debug log
+  test "should log debug message when skipping bundles" do
+    service = ProductScraperService.new("https://example.com", debug: true, exclude_bundles: true)
+
+    # Create HTML with a bundle product
+    bundle_html = <<~HTML
+      <div class="woocommerce">
+        <ul class="products">
+          <li class="product">
+            <a href="https://signaturesolar.com/eg4-solar-kit/" class="woocommerce-LoopProduct-link">
+              <h2 class="woocommerce-loop-product__title">EG4 Solar Kit Bundle</h2>
+              <span class="price">
+                <span class="woocommerce-Price-amount">$2,999.99</span>
+              </span>
+            </a>
+          </li>
+        </ul>
+      </div>
+    HTML
+
+    page = Nokogiri::HTML(bundle_html)
+    service.expects(:fetch_page).returns(page)
+
+    # Capture debug output
+    debug_output = []
+    service.expects(:debug_log).at_least(1).with { |msg| debug_output << msg; true }
+
+    service.scrape
+
+    # Verify bundle skip message was logged
+    skip_message = debug_output.find { |msg| msg.include?("Skipped bundle/kit") }
+    assert skip_message, "Expected bundle skip debug message"
+    assert_includes skip_message, "EG4 Solar Kit Bundle"
+  end
 end

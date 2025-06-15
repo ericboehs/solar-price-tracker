@@ -33,7 +33,7 @@
           <!-- Logo/Brand -->
           <div class="flex flex-1 items-center justify-start">
             <div class="flex shrink-0 items-center">
-              <%= link_to root_path, class: "text-xl font-bold text-gray-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-200" do %>
+              <%= link_to root_path, class: "text-xl font-bold text-gray-900 dark:text-white hover:text-orange-600 dark:hover:text-orange-200" do %>
                 ☀️ Solar Price Tracker
               <% end %>
             </div>
@@ -42,6 +42,8 @@
           <!-- Desktop menu -->
           <div class="hidden sm:ml-6 sm:flex sm:items-center sm:space-x-4">
             <% if authenticated? %>
+              <%= link_to "Products", products_path,
+                    class: "rounded-md px-3 py-2 text-sm font-medium text-white/80 hover:bg-white/10 hover:text-white transition-colors" %>
               <span class="flex items-center px-3 py-2 text-sm font-medium text-white/80">
                 <%= current_user.email_address %>
                 <% if admin? %>
@@ -57,7 +59,7 @@
               <%= link_to "Sign in", new_session_path,
                     class: "rounded-md px-3 py-2 text-sm font-medium text-white/80 hover:bg-white/10 hover:text-white transition-colors" %>
               <%= link_to "Sign up", new_registration_path,
-                    class: "rounded-md px-3 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors" %>
+                    class: "rounded-md px-3 py-2 text-sm font-medium text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 transition-colors" %>
             <% end %>
           </div>
 
@@ -65,7 +67,7 @@
           <div class="flex items-center sm:hidden">
             <button type="button"
                     data-action="click->mobile-menu#toggle"
-                    class="relative inline-flex items-center justify-center rounded-md p-2 text-gray-900/80 dark:text-white/80 hover:bg-gray-200/20 dark:hover:bg-white/10 hover:text-gray-900 dark:hover:text-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500"
+                    class="relative inline-flex items-center justify-center rounded-md p-2 text-gray-900/80 dark:text-white/80 hover:bg-gray-200/20 dark:hover:bg-white/10 hover:text-gray-900 dark:hover:text-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-orange-500"
                     aria-controls="mobile-menu"
                     aria-expanded="false">
               <span class="absolute -inset-0.5"></span>
@@ -85,6 +87,8 @@
       <div class="hidden" id="mobile-menu" data-mobile-menu-target="menu">
         <div class="sm:hidden space-y-1 px-2 pb-3 pt-2 bg-white/10 dark:bg-gray-800/50 backdrop-blur-sm border-t border-white/20 dark:border-gray-700/20">
           <% if authenticated? %>
+            <%= link_to "Products", products_path,
+                  class: "block rounded-md px-3 py-2 text-base font-medium text-gray-700 dark:text-white/80 hover:bg-white/20 dark:hover:bg-white/10 hover:text-gray-900 dark:hover:text-white" %>
             <div class="px-3 py-2 text-sm text-gray-700 dark:text-white/80">
               Signed in as <%= current_user.email_address %>
               <% if admin? %>
@@ -100,7 +104,7 @@
             <%= link_to "Sign in", new_session_path,
                   class: "block rounded-md px-3 py-2 text-base font-medium text-gray-700 dark:text-white/80 hover:bg-white/20 dark:hover:bg-white/10 hover:text-gray-900 dark:hover:text-white" %>
             <%= link_to "Sign up", new_registration_path,
-                  class: "block rounded-md px-3 py-2 text-base font-medium text-white bg-blue-600 hover:bg-blue-700" %>
+                  class: "block rounded-md px-3 py-2 text-base font-medium text-white bg-orange-600 hover:bg-orange-700" %>
           <% end %>
         </div>
       </div>
@@ -122,6 +126,48 @@
 
       <%= yield %>
     </main>
+
+    <script>
+      // Handle touch events for iOS blend mode effects
+      function setupTouchEvents() {
+        const productImages = document.querySelectorAll('.group img');
+
+        productImages.forEach(function(img) {
+          // Remove existing listeners to prevent duplicates
+          img.removeEventListener('touchstart', handleTouchStart);
+          img.removeEventListener('touchend', handleTouchEnd);
+          img.removeEventListener('touchcancel', handleTouchEnd);
+
+          // Add touch event listeners
+          img.addEventListener('touchstart', handleTouchStart, { passive: true });
+          img.addEventListener('touchend', handleTouchEnd, { passive: true });
+          img.addEventListener('touchcancel', handleTouchEnd, { passive: true });
+        });
+      }
+
+      function handleTouchStart() {
+        if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+          this.style.mixBlendMode = 'normal';
+          this.style.opacity = '1';
+        }
+      }
+
+      function handleTouchEnd() {
+        if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+          this.style.mixBlendMode = 'multiply';
+          this.style.opacity = '0.9';
+        }
+      }
+
+      // Setup on initial load
+      document.addEventListener('DOMContentLoaded', setupTouchEvents);
+
+      // Setup on Turbo navigation (for back button, etc.)
+      document.addEventListener('turbo:load', setupTouchEvents);
+
+      // Setup on Turbo frame loads
+      document.addEventListener('turbo:frame-load', setupTouchEvents);
+    </script>
 
   </body>
 </html>

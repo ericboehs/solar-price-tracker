@@ -6,29 +6,27 @@ class AuthenticationTest < ActionDispatch::IntegrationTest
     @admin = User.create!(email_address: "admin@example.com", password: "password123", admin: true)
   end
 
-  test "should redirect unauthenticated user to sign in for protected paths" do
-    # Test that accessing the root requires authentication when we're not signed in
-    # and there's a session return_to URL set
+  test "should redirect unauthenticated user from root to welcome" do
     get root_path
-    assert_response :success # Welcome page is public
+    assert_redirected_to controller: :welcome, action: :index
   end
 
-  test "should allow authenticated user access" do
+  test "should redirect authenticated user from root to products" do
     sign_in_as(@user)
     get root_path
-    assert_response :success
+    assert_redirected_to products_path
   end
 
-  test "should show admin badge for admin users" do
+  test "should show admin badge for admin users on welcome page" do
     sign_in_as(@admin)
-    get root_path
+    get welcome_index_path
     assert_response :success
     assert_select "span", text: "Admin"
   end
 
-  test "should not show admin badge for regular users" do
+  test "should not show admin badge for regular users on welcome page" do
     sign_in_as(@user)
-    get root_path
+    get welcome_index_path
     assert_response :success
     assert_select "span", text: "Admin", count: 0
   end
