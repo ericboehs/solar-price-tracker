@@ -1,24 +1,146 @@
-# README
+# Solar Price Tracker
 
-This README would normally document whatever steps are necessary to get the
-application up and running.
+A Rails application for tracking prices of solar equipment from various e-commerce sites, starting with SignatureSolar.com. The app monitors product listings, tracks price changes over time, and provides insights into pricing trends.
 
-Things you may want to cover:
+## Features
 
-* Ruby version
+- **Automated Price Tracking**: Scrapes product listings and individual product pages
+- **Price History**: Maintains complete price history for trend analysis
+- **Smart Filtering**: Excludes bundles and unwanted products
+- **Watch Lists**: Monitor specific searches or individual products
+- **Price Alerts**: Get notified when prices change (planned)
+- **Analytics**: View price trends, historical lows, and price change patterns
 
-* System dependencies
+## Tech Stack
 
-* Configuration
+- Ruby on Rails 8.0
+- PostgreSQL for data storage
+- Nokogiri for web scraping
+- Solid Queue for background jobs
+- Stimulus for interactive UI components
 
-* Database creation
+## Setup
 
-* Database initialization
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/ericboehs/solar-price-tracker.git
+   cd solar-price-tracker
+   ```
 
-* How to run the test suite
+2. **Install dependencies**
+   ```bash
+   bundle install
+   ```
 
-* Services (job queues, cache servers, search engines, etc.)
+3. **Setup database**
+   ```bash
+   rails db:create
+   rails db:migrate
+   rails db:seed # Optional: loads sample data
+   ```
 
-* Deployment instructions
+4. **Configure environment variables**
+   ```bash
+   cp .env.example .env
+   # Edit .env with your configuration
+   ```
 
-* ...
+5. **Start the application**
+   ```bash
+   bin/dev
+   ```
+
+   This starts both the Rails server and Solid Queue for background jobs.
+
+## Usage
+
+### Adding Watches
+
+1. Navigate to the Watches section
+2. Click "New Watch"
+3. Enter a SignatureSolar.com search URL or product URL
+4. Configure filters (exclude bundles, omit specific terms)
+5. Save the watch
+
+The system will automatically begin tracking prices for products matching your criteria.
+
+### Viewing Price History
+
+1. Go to the Products page
+2. Click on any product to see its details
+3. View the price chart showing historical trends
+4. Check if the product is at its lowest price
+
+### API Endpoints (Planned)
+
+- `GET /api/products` - List all tracked products
+- `GET /api/products/:id/price_history` - Get price history for a product
+- `GET /api/watches` - List active watches
+- `POST /api/watches` - Create a new watch
+
+## Development
+
+### Running Tests
+```bash
+rails test
+rails test:system
+```
+
+### Code Quality
+```bash
+bin/rubocop
+bin/brakeman
+```
+
+### Background Jobs
+
+The app uses Solid Queue for background processing. Jobs run automatically when using `bin/dev`.
+
+To run jobs manually:
+```bash
+rails solid_queue:start
+```
+
+### Scraping Schedule
+
+- **Production**: Runs at 2 AM and 12 PM CT daily
+- **Development**: Runs every 30 minutes
+
+Configure in `config/recurring.yml`.
+
+## Architecture
+
+### Models
+
+- **Product**: Solar equipment with pricing data
+- **PriceHistory**: Historical price records for each product
+- **Watch**: Monitors URLs for new products and price changes
+- **User**: Authentication and authorization
+- **Session**: User session management
+
+### Services
+
+- **ProductScraperService**: Core scraping logic for extracting product data
+- **PriceTrackingService**: Manages price history and change detection
+
+### Jobs
+
+- **ScrapeWatchesJob**: Processes all active watches on a schedule
+- **ProcessWatchJob**: Scrapes a single watch URL
+
+## Contributing
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## Acknowledgments
+
+- SignatureSolar.com for providing product data
+- The Rails community for excellent documentation and gems
