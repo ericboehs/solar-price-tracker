@@ -110,7 +110,17 @@ Check code quality:
 bin/rubocop      # Ruby style guide compliance
 bin/brakeman     # Security vulnerability scanning
 rails test       # Runs tests with coverage report
+bin/ci           # Run all CI checks (tests, linting, security)
+bin/coverage     # Analyze coverage report and get improvement suggestions
 ```
+
+### Git Hooks
+
+The project includes a pre-commit hook that automatically runs `bin/ci` before each commit:
+- Ensures all tests pass with required coverage
+- Validates code style with RuboCop
+- Checks for security vulnerabilities with Brakeman
+- Sends macOS notifications on success/failure (requires terminal-notifier)
 
 ### Database
 
@@ -223,3 +233,7 @@ Core service for web scraping:
 - Implement database connection pooling
 - Consider CDN for static assets
 - Monitor memory usage of scraping jobs
+
+## CLI Development Notes
+
+- `bin/ci --fix` should fix bin/ci issues (and pre commit issues)

@@ -102,6 +102,11 @@ rails test
 # Coverage report available at coverage/index.html
 ```
 
+To analyze coverage and get help improving it:
+```bash
+bin/coverage
+```
+
 ### Background Jobs
 
 The app uses Solid Queue for background processing. Jobs run automatically when using `bin/dev`.

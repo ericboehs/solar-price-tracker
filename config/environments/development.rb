@@ -12,6 +12,9 @@ Rails.application.configure do
   # Show full error reports.
   config.consider_all_requests_local = true
 
+  # Allow requests from e14.local
+  config.hosts << "e14.local"
+
   # Enable server timing.
   config.server_timing = true
 
