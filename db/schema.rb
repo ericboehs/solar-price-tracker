@@ -10,7 +10,19 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_06_15_014025) do
+ActiveRecord::Schema[8.0].define(version: 2025_06_15_033419) do
+  create_table "products", force: :cascade do |t|
+    t.string "title", null: false
+    t.string "url", null: false
+    t.string "slug", null: false
+    t.string "image_url"
+    t.decimal "price", precision: 8, scale: 2
+    t.datetime "last_scraped_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["slug"], name: "index_products_on_slug", unique: true
+  end
+
   create_table "sessions", force: :cascade do |t|
     t.integer "user_id", null: false
     t.string "ip_address"

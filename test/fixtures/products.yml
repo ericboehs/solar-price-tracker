@@ -1,0 +1,17 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+battery_48v:
+  title: "EG4 LifePower4 Lithium Battery 48V 100Ah"
+  url: "https://signaturesolar.com/eg4-lifepower4-lithium-battery-48v-100ah/"
+  slug: "eg4-lifepower4-lithium-battery-48v-100ah"
+  image_url: "https://signaturesolar.com/wp-content/uploads/2023/10/EG4-LifePower4-Lithium-Battery-48V-100Ah-500x500.jpg"
+  price: 1299.99
+  last_scraped_at: <%= 2.hours.ago %>
+
+inverter_6000w:
+  title: "EG4 6000XP | 48V All-In-One Hybrid Inverter | 6000W"
+  url: "https://signaturesolar.com/eg4-6000xp-48v-all-in-one-hybrid-inverter-6000w/"
+  slug: "eg4-6000xp-48v-all-in-one-hybrid-inverter-6000w"
+  image_url: "https://signaturesolar.com/wp-content/uploads/2022/08/EG4-6000XP-48V-All-In-One-Hybrid-Inverter-6000W-500x500.jpg"
+  price: 1499.99
+  last_scraped_at: <%= 1.day.ago %>
