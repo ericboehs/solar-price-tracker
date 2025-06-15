@@ -23,6 +23,9 @@ gem "bcrypt", "~> 3.1.7"
 # HTML parsing for web scraping
 gem "nokogiri"
 
+# ViewComponent for creating reusable, testable view components
+gem "view_component"
+
 # Windows does not include zoneinfo files, so bundle the tzinfo-data gem
 gem "tzinfo-data", platforms: %i[ windows jruby ]
 

@@ -1,4 +1,6 @@
 module ApplicationHelper
+  include AlertHelper
+
   def safe_url(url)
     return nil if url.blank?
 
