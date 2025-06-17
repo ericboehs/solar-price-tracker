@@ -4,13 +4,6 @@ This documentation folder contains comprehensive information about the UI compon
 
 ## 📁 Documentation Files
 
-### [Tailwind Plus UI Components](./tailwind-plus-ui-components.md)
-Complete overview of Tailwind Plus UI components used throughout the application, including:
-- Component descriptions and use cases
-- Links to official Tailwind Plus documentation
-- Implementation priorities and strategies
-- File organization recommendations
-
 ### [Component Mapping](./component-mapping.md) 
 Detailed mapping of current implementations to recommended Tailwind Plus components:
 - Side-by-side code comparisons

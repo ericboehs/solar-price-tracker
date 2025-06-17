@@ -237,3 +237,81 @@ Core service for web scraping:
 ## CLI Development Notes
 
 - `bin/ci --fix` should fix bin/ci issues (and pre commit issues)
+
+## UI Development with Tailwind Plus
+
+### Using Tailwind Plus Components
+
+When implementing new UI features or improving existing views, **ALWAYS** use the `tailwind-plus` command to find and implement appropriate Tailwind UI Plus components. This tool is installed system-wide and provides access to a comprehensive offline library of high-quality UI components.
+
+### Component Discovery Workflow
+
+1. **Search for relevant components** before implementing any UI:
+    ```bash
+    # Search for specific patterns
+    tailwind-plus search "table"
+    tailwind-plus search "form"
+    tailwind-plus search "navigation"
+    tailwind-plus search "card"
+    ```
+
+2. **View component code** in your preferred format:
+    ```bash
+    # View HTML version (most common for Rails ERB)
+    tailwind-plus view application-ui_lists_tables:0 --format html
+    
+    # View React version for reference
+    tailwind-plus view marketing_sections_heroes:2 --format react
+    
+    # Get machine-readable JSON for analysis
+    tailwind-plus view ecommerce_components_product-lists:1 --json
+    ```
+
+3. **Browse components offline** for visual selection:
+    ```bash
+    # Start local server to browse components visually
+    tailwind-plus serve
+    # Then visit http://localhost:4567
+    ```
+
+### Implementation Guidelines
+
+**ALWAYS prefer Tailwind Plus components over custom implementations:**
+- Use existing patterns for consistency and professional appearance
+- Adapt component HTML to work with Rails ERB syntax
+- Maintain the component's CSS classes and structure
+- Extract reusable components using ViewComponent when appropriate
+
+**Component Integration Process:**
+1. Search and identify the appropriate Tailwind Plus component
+2. Copy the HTML structure from `tailwind-plus view`
+3. Adapt the HTML for Rails ERB (add Ruby variables, loops, conditionals)
+4. Test responsive behavior and accessibility
+5. Create ViewComponent if the pattern will be reused
+
+**Example Categories and Use Cases:**
+- **Tables**: `tailwind-plus search "table"` - For admin interfaces, data displays
+- **Forms**: `tailwind-plus search "form"` - User input, filters, authentication
+- **Cards**: `tailwind-plus search "card"` - Product displays, statistics, content blocks  
+- **Navigation**: `tailwind-plus search "nav"` - Headers, menus, breadcrumbs
+- **Buttons**: `tailwind-plus search "button"` - Actions, CTAs, form submissions
+- **Alerts**: `tailwind-plus search "alert"` - Flash messages, notifications
+- **Empty States**: `tailwind-plus search "empty"` - No data conditions
+
+### Quality Standards
+
+- **Mobile-first responsive design** - All Tailwind Plus components are responsive
+- **Accessibility compliance** - Components follow WCAG guidelines
+- **Professional appearance** - Consistent with modern web applications
+- **Performance optimized** - Minimal custom CSS, utility-first approach
+
+### Integration with Existing Code
+
+When updating existing views:
+1. Identify current UI patterns that could be improved
+2. Search for equivalent Tailwind Plus components
+3. Gradually replace custom implementations with standardized components
+4. Maintain existing functionality while improving visual design
+5. Test thoroughly to ensure no regressions
+
+This approach ensures consistent, professional, and accessible UI throughout the application while leveraging industry-standard design patterns.
