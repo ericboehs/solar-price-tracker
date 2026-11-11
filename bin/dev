@@ -1,2 +1,4 @@
 #!/usr/bin/env ruby
+# Run Solid Queue (jobs + recurring schedule) inside Puma so scrapes actually run in dev.
+ENV["SOLID_QUEUE_IN_PUMA"] ||= "1"
 exec "./bin/rails", "server", *ARGV
