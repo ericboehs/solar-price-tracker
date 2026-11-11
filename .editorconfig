@@ -19,3 +19,7 @@ indent_style = tab
 
 [config/*.key]
 insert_final_newline = unset
+
+[app/assets/builds/**]
+insert_final_newline = unset
+trim_trailing_whitespace = unset

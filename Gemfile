@@ -76,3 +76,5 @@ group :test do
   # Mocking and stubbing for tests
   gem "mocha"
 end
+
+gem "tailwindcss-rails", "~> 4.7"

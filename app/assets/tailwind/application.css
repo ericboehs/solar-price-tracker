@@ -1,0 +1,23 @@
+@import "tailwindcss";
+
+/* Scan Ruby view helpers and components for class names too. */
+@source "../../helpers";
+@source "../../components";
+
+/*
+  Tailwind v4 compatibility: keep v3 defaults the views were written against.
+*/
+@layer base {
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--color-gray-200, currentcolor);
+  }
+
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: pointer;
+  }
+}

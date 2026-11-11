@@ -3,7 +3,7 @@
 <div class="bg-white dark:bg-gray-900">
   <div class="relative isolate px-6 lg:px-8">
     <div class="absolute inset-x-0 -top-40 -z-10 transform-gpu overflow-hidden blur-3xl sm:-top-80" aria-hidden="true">
-      <div class="relative left-[calc(50%-11rem)] aspect-[1155/678] w-[36.125rem] -translate-x-1/2 rotate-[30deg] bg-gradient-to-tr from-yellow-400 to-blue-600 opacity-30 sm:left-[calc(50%-30rem)] sm:w-[72.1875rem]"></div>
+      <div class="relative left-[calc(50%-11rem)] aspect-1155/678 w-144.5 -translate-x-1/2 rotate-30 bg-linear-to-tr from-yellow-400 to-blue-600 opacity-30 sm:left-[calc(50%-30rem)] sm:w-288.75"></div>
     </div>
 
     <div class="mx-auto max-w-2xl py-32 sm:py-48 lg:py-56">
@@ -30,12 +30,12 @@
         <div class="mt-10 flex items-center justify-center gap-x-6">
           <% if authenticated? %>
             <%= link_to "View Products", products_path,
-                  class: "rounded-md bg-orange-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-orange-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange-600" %>
+                  class: "rounded-md bg-orange-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-xs hover:bg-orange-500 focus-visible:outline-solid focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange-600" %>
             <%= link_to "Dashboard", root_path,
                   class: "text-sm/6 font-semibold text-gray-900 dark:text-white hover:text-orange-600 dark:hover:text-orange-400" %>
           <% else %>
             <%= link_to "Get started", new_registration_path,
-                  class: "rounded-md bg-orange-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-orange-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange-600" %>
+                  class: "rounded-md bg-orange-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-xs hover:bg-orange-500 focus-visible:outline-solid focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange-600" %>
             <%= link_to "Sign in", new_session_path,
                   class: "text-sm/6 font-semibold text-gray-900 dark:text-white hover:text-orange-600 dark:hover:text-orange-400" %>
           <% end %>
@@ -44,7 +44,7 @@
     </div>
 
     <div class="absolute inset-x-0 top-[calc(100%-13rem)] -z-10 transform-gpu overflow-hidden blur-3xl sm:top-[calc(100%-30rem)]" aria-hidden="true">
-      <div class="relative left-[calc(50%+3rem)] aspect-[1155/678] w-[36.125rem] -translate-x-1/2 bg-gradient-to-tr from-yellow-400 to-blue-600 opacity-30 sm:left-[calc(50%+36rem)] sm:w-[72.1875rem]"></div>
+      <div class="relative left-[calc(50%+3rem)] aspect-1155/678 w-144.5 -translate-x-1/2 bg-linear-to-tr from-yellow-400 to-blue-600 opacity-30 sm:left-[calc(50%+36rem)] sm:w-288.75"></div>
     </div>
   </div>
 
