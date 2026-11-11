@@ -13,10 +13,10 @@ class AdminControllerTest < ActionDispatch::IntegrationTest
     assert_equal "Access denied. Admin privileges required.", flash[:alert]
   end
 
-  test "should allow admin users" do
+  test "should send admin users to the watches list" do
     sign_in_as(@admin)
     get admin_path
-    assert_response :success
+    assert_redirected_to admin_watches_path
   end
 
   test "should redirect unauthenticated users to sign in" do
