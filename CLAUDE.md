@@ -85,8 +85,7 @@ git commit -m "refactor: extract price parsing logic to service"
 
 Run tests with:
 ```bash
-rails test
-rails test:system
+bin/rails test:all   # unit + system tests in one run (one coverage report)
 ```
 
 ### Code Coverage
@@ -124,10 +123,9 @@ The project includes a pre-commit hook that automatically runs `bin/ci` before e
 
 ### Database
 
-Using PostgreSQL for:
-- JSON column support
-- Full-text search capabilities
-- Robust indexing
+SQLite (Rails 8 defaults). Development and production use a separate
+queue database for Solid Queue (`storage/*_queue.sqlite3`, schema in
+`db/queue_schema.rb`).
 
 ### Scraping Best Practices
 
@@ -206,13 +204,12 @@ Core service for web scraping:
 
 ### Required Environment Variables
 
-- `DATABASE_URL` - PostgreSQL connection string
 - `RAILS_MASTER_KEY` - For credentials encryption
-- `SOLID_QUEUE_ASYNC` - Enable async job processing
+- `SOLID_QUEUE_IN_PUMA` - Run Solid Queue (workers + recurring schedule) inside Puma; `bin/dev` sets it
 
 ### Development Tools
 
-- `bin/dev` - Starts Rails server (Solid Queue runs automatically with Puma)
+- `bin/dev` - Starts Rails server with Solid Queue and the Tailwind watcher as Puma plugins
 - `rails console` - Interactive Ruby session
 - `rails db` - Direct database access
 - `rails routes` - View all application routes
