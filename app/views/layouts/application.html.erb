@@ -19,11 +19,10 @@
 
     <%# Includes all stylesheet files in app/assets/stylesheets %>
     <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
+    <%# Chart.js UMD build (vendored, v4.6.1) for price history charts; defines window.Chart. %>
+    <%= javascript_include_tag "chart.umd.min", "data-turbo-track": "reload" %>
     <%= javascript_importmap_tags %>
 
-    <%# Chart.js for price history charts %>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
 
   </head>
 
@@ -135,48 +134,5 @@
 
       <%= yield %>
     </main>
-
-    <script>
-      // Handle touch events for iOS blend mode effects
-      function setupTouchEvents() {
-        const productImages = document.querySelectorAll('.group img');
-
-        productImages.forEach(function(img) {
-          // Remove existing listeners to prevent duplicates
-          img.removeEventListener('touchstart', handleTouchStart);
-          img.removeEventListener('touchend', handleTouchEnd);
-          img.removeEventListener('touchcancel', handleTouchEnd);
-
-          // Add touch event listeners
-          img.addEventListener('touchstart', handleTouchStart, { passive: true });
-          img.addEventListener('touchend', handleTouchEnd, { passive: true });
-          img.addEventListener('touchcancel', handleTouchEnd, { passive: true });
-        });
-      }
-
-      function handleTouchStart() {
-        if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-          this.style.mixBlendMode = 'normal';
-          this.style.opacity = '1';
-        }
-      }
-
-      function handleTouchEnd() {
-        if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-          this.style.mixBlendMode = 'multiply';
-          this.style.opacity = '0.9';
-        }
-      }
-
-      // Setup on initial load
-      document.addEventListener('DOMContentLoaded', setupTouchEvents);
-
-      // Setup on Turbo navigation (for back button, etc.)
-      document.addEventListener('turbo:load', setupTouchEvents);
-
-      // Setup on Turbo frame loads
-      document.addEventListener('turbo:frame-load', setupTouchEvents);
-    </script>
-
   </body>
 </html>

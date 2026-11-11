@@ -50,7 +50,7 @@
                   alt: @product.title,
                   class: "h-full w-full object-cover object-center dark:mix-blend-multiply dark:opacity-90 dark:hover:mix-blend-normal dark:hover:opacity-100 transition-all duration-150",
                   loading: "lazy",
-                  onerror: "this.style.display='none'; this.nextElementSibling.style.display='flex';" %>
+                  data: { controller: "image-fallback", action: "error->image-fallback#swap", touch_blend_target: "image" } %>
               <div class="hidden h-full w-full items-center justify-center bg-gray-100 dark:bg-gray-800">
                 <div class="text-center">
                   <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -152,7 +152,7 @@
                 alt: @product.title,
                 class: "h-full w-full object-cover object-center dark:mix-blend-multiply dark:opacity-90 dark:hover:mix-blend-normal dark:hover:opacity-100 transition-all duration-150",
                 loading: "lazy",
-                onerror: "this.style.display='none'; this.nextElementSibling.style.display='flex';" %>
+                data: { controller: "image-fallback", action: "error->image-fallback#swap", touch_blend_target: "image" } %>
             <div class="hidden h-full w-full items-center justify-center bg-gray-100 dark:bg-gray-800">
               <div class="text-center">
                 <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -208,7 +208,8 @@
               </div>
 
               <div class="relative h-64">
-                <canvas id="priceChart"></canvas>
+                <canvas id="priceChart" data-controller="price-chart"
+                        data-price-chart-points-value="<%= @price_histories.map { |ph| { label: ph.recorded_at.strftime("%m/%d"), date: ph.recorded_at.strftime("%m/%d/%Y"), price: ph.price.to_f } }.to_json %>"></canvas>
               </div>
             </div>
           </div>
@@ -247,148 +248,3 @@
     </div>
   </div>
 </div>
-
-<% if @price_histories.any? %>
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-  const ctx = document.getElementById('priceChart');
-  if (!ctx) return;
-
-  // Destroy any existing chart on this canvas
-  const existingChart = Chart.getChart(ctx);
-  if (existingChart) {
-    existingChart.destroy();
-  }
-
-  // Prepare data for Chart.js
-  const priceData = <%= raw @price_histories.map.with_index { |ph, index|
-    {
-      x: index,
-      y: ph.price.to_f,
-      date: ph.recorded_at.strftime('%m/%d/%Y')
-    }
-  }.to_json %>;
-
-  const labels = <%= raw @price_histories.map { |ph| ph.recorded_at.strftime('%m/%d') }.to_json %>;
-
-  // Detect dark mode
-  const isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
-  const textColor = isDarkMode ? '#F3F4F6' : '#374151';
-  const gridColor = isDarkMode ? '#374151' : '#E5E7EB';
-  const pointBorderColor = isDarkMode ? '#1F2937' : '#FFFFFF';
-
-  try {
-    const chart = new Chart(ctx, {
-    type: 'line',
-    data: {
-      labels: labels,
-      datasets: [{
-        label: 'Price ($)',
-        data: priceData.map(point => point.y),
-        borderColor: '#EA580C', // Orange-600
-        backgroundColor: 'rgba(234, 88, 12, 0.1)',
-        borderWidth: 2,
-        fill: true,
-        tension: 0.4,
-        pointBackgroundColor: '#EA580C',
-        pointBorderColor: pointBorderColor,
-        pointBorderWidth: 2,
-        pointRadius: 4,
-        pointHoverRadius: 6,
-        pointHoverBackgroundColor: '#EA580C',
-        pointHoverBorderColor: pointBorderColor,
-        pointHoverBorderWidth: 2
-      }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      interaction: {
-        intersect: false,
-        mode: 'index'
-      },
-      plugins: {
-        legend: {
-          display: false
-        },
-        tooltip: {
-          backgroundColor: isDarkMode ? '#1F2937' : '#FFFFFF',
-          titleColor: textColor,
-          bodyColor: textColor,
-          borderColor: gridColor,
-          borderWidth: 1,
-          cornerRadius: 8,
-          padding: 12,
-          displayColors: false,
-          callbacks: {
-            title: function(context) {
-              const index = context[0].dataIndex;
-              return priceData[index] ? priceData[index].date : labels[index];
-            },
-            label: function(context) {
-              return '$' + context.parsed.y.toFixed(2);
-            }
-          }
-        }
-      },
-      scales: {
-        x: {
-          grid: {
-            color: gridColor,
-            borderColor: gridColor
-          },
-          ticks: {
-            color: textColor,
-            maxTicksLimit: 6
-          }
-        },
-        y: {
-          beginAtZero: false,
-          grid: {
-            color: gridColor,
-            borderColor: gridColor
-          },
-          ticks: {
-            color: textColor,
-            callback: function(value) {
-              return '$' + value.toFixed(2);
-            }
-          }
-        }
-      }
-    }
-  });
-
-    // Update chart colors when dark mode changes
-    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function(e) {
-      const newTextColor = e.matches ? '#F3F4F6' : '#374151';
-      const newGridColor = e.matches ? '#374151' : '#E5E7EB';
-      const newPointBorderColor = e.matches ? '#1F2937' : '#FFFFFF';
-
-      // Update scales
-      chart.options.scales.x.grid.color = newGridColor;
-      chart.options.scales.x.grid.borderColor = newGridColor;
-      chart.options.scales.x.ticks.color = newTextColor;
-      chart.options.scales.y.grid.color = newGridColor;
-      chart.options.scales.y.grid.borderColor = newGridColor;
-      chart.options.scales.y.ticks.color = newTextColor;
-
-      // Update data point colors
-      chart.data.datasets[0].pointBorderColor = newPointBorderColor;
-      chart.data.datasets[0].pointHoverBorderColor = newPointBorderColor;
-
-      // Update tooltip colors
-      chart.options.plugins.tooltip.backgroundColor = e.matches ? '#1F2937' : '#FFFFFF';
-      chart.options.plugins.tooltip.titleColor = newTextColor;
-      chart.options.plugins.tooltip.bodyColor = newTextColor;
-      chart.options.plugins.tooltip.borderColor = newGridColor;
-
-      chart.update();
-    });
-
-  } catch (error) {
-    console.error('Error creating price history chart:', error);
-  }
-});
-</script>
-<% end %>

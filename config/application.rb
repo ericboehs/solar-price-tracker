@@ -28,6 +28,11 @@ module SolarPriceTracker
     config.x.registrations_open =
       ENV.fetch("REGISTRATIONS_OPEN") { Rails.env.production? ? "false" : "true" } == "true"
 
+    # Deny powerful browser features (Rails' permissions_policy still emits the
+    # legacy Feature-Policy header, which browsers ignore).
+    config.action_dispatch.default_headers["Permissions-Policy"] =
+      "camera=(), microphone=(), geolocation=(), payment=(), usb=(), gyroscope=(), magnetometer=(), accelerometer=(), fullscreen=(self), browsing-topics=()"
+
     # Active Storage isn't used for uploads; skip the image_processing check.
     config.active_storage.variant_processor = :disabled
     # config.eager_load_paths << Rails.root.join("extras")
