@@ -6,6 +6,7 @@ class ProductScraperService
   USER_AGENT = "Mozilla/5.0 (compatible; SolarPriceTracker/1.0; +https://github.com/ericboehs/solar-price-tracker)"
   MAX_PAGES = 10
   PAGE_DELAY = 1.0 # seconds between paginated requests
+  IMAGE_SIZE = "608x608"
 
   def initialize(search_url = nil, debug: false, exclude_bundles: true, omit_terms: [], max_pages: MAX_PAGES, page_delay: PAGE_DELAY)
     @search_url = search_url
@@ -129,7 +130,7 @@ class ProductScraperService
     link_element = element.at_css("h4.card-title a, a[href*='eg4'], a[href*='product'], a.woocommerce-LoopProduct-link, h3 a, h2 a, .product-title a, .product-name a")
     if link_element
       href = link_element["href"]
-      data[:url] = href.start_with?("http") ? href : "#{BASE_URL}#{href}"
+      data[:url] = clean_product_url(href.start_with?("http") ? href : "#{BASE_URL}#{href}")
     end
 
     # Extract price (prioritize sale price)
@@ -140,7 +141,7 @@ class ProductScraperService
     img_element = element.at_css(".card-image, img")
     if img_element
       src = img_element["src"] || img_element["data-src"]
-      data[:image_url] = src if src && !src.include?("placeholder")
+      data[:image_url] = upsize_image_url(src) if src && !src.include?("placeholder")
     end
 
     data
@@ -201,6 +202,7 @@ class ProductScraperService
       old_price = product.price
       product.update(
         title: product_data[:title],
+        url: product_data[:url],
         price: product_data[:price],
         image_url: product_data[:image_url],
         last_scraped_at: scraped_at
@@ -230,6 +232,21 @@ class ProductScraperService
     end
 
     product.persisted? ? product : nil
+  end
+
+  # Drop per-search tracking params (e.g. ?searchuuid=...&search_query=...).
+  def clean_product_url(url)
+    uri = URI.parse(url)
+    uri.query = nil
+    uri.fragment = nil
+    uri.to_s
+  rescue URI::InvalidURIError
+    url
+  end
+
+  # BigCommerce serves resized images at /images/stencil/WxH/; ask for a larger one.
+  def upsize_image_url(src)
+    src.sub(%r{/images/stencil/(?:\d+x\d+|\d+w)/}, "/images/stencil/#{IMAGE_SIZE}/")
   end
 
   def extract_slug_from_url(url)

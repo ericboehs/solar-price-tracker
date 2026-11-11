@@ -579,4 +579,20 @@ class ProductScraperServiceTest < ActiveSupport::TestCase
     assert_not service.send(:is_bundle_or_kit?, "Breaker Reset Tool")
     assert_not service.send(:is_bundle_or_kit?, "EG4 Rack Mount Offset Bracket")
   end
+
+  test "clean_product_url strips query and fragment" do
+    service = ProductScraperService.new
+    assert_equal "https://signaturesolar.com/eg4-battery/",
+      service.send(:clean_product_url, "https://signaturesolar.com/eg4-battery/?searchuuid=abc&search_query=eg4#top")
+    assert_equal "http://[bad", service.send(:clean_product_url, "http://[bad")
+  end
+
+  test "upsize_image_url requests larger BigCommerce stencil images" do
+    service = ProductScraperService.new
+    assert_equal "https://cdn11.bigcommerce.com/s-x/images/stencil/608x608/products/1/2/a.jpg?c=1",
+      service.send(:upsize_image_url, "https://cdn11.bigcommerce.com/s-x/images/stencil/270x270/products/1/2/a.jpg?c=1")
+    assert_equal "https://cdn11.bigcommerce.com/s-x/images/stencil/608x608/products/1/2/b.png",
+      service.send(:upsize_image_url, "https://cdn11.bigcommerce.com/s-x/images/stencil/160w/products/1/2/b.png")
+    assert_equal "https://example.com/a.jpg", service.send(:upsize_image_url, "https://example.com/a.jpg")
+  end
 end
