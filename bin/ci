@@ -40,6 +40,11 @@ brakeman --no-pager --quiet
 echo "✅ brakeman security scan passed"
 echo
 
+echo "📦 Running bundler-audit..."
+bin/bundler-audit
+echo "✅ bundler-audit passed"
+echo
+
 echo "🧪 Running tests (unit + system, one coverage run)..."
 bin/rails test:all
 echo "✅ tests passed"
