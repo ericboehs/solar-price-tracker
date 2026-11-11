@@ -4,42 +4,42 @@ require "simplecov"
 # Configure SimpleCov for parallel test support
 SimpleCov.start "rails" do
   # Enable merging for parallel test support
-  use_merging true
+  merging true
 
   # Set minimum coverage percentage (adjusted for phased development)
   minimum_coverage 99.0
-  minimum_coverage_by_file 90
+  coverage(:line) { minimum 90, per: :file }
 
   # Enable branch coverage tracking
   enable_coverage :branch
 
   # Add filters for files/directories to exclude from coverage
-  add_filter "/spec/"
-  add_filter "/config/"
-  add_filter "/vendor/"
-  add_filter "/db/"
-  add_filter "/bin/"
-  add_filter "/test/"
-  add_filter "app/channels/application_cable/connection.rb"
-  add_filter "app/jobs/application_job.rb"
-  add_filter "app/mailers/application_mailer.rb"
-  add_filter "app/models/application_record.rb"
-  add_filter "app/models/current.rb"
-  add_filter "app/helpers/application_helper.rb"
-  add_filter "app/mailers/passwords_mailer.rb"
+  skip "/spec/"
+  skip "/config/"
+  skip "/vendor/"
+  skip "/db/"
+  skip "/bin/"
+  skip "/test/"
+  skip "app/channels/application_cable/connection.rb"
+  skip "app/jobs/application_job.rb"
+  skip "app/mailers/application_mailer.rb"
+  skip "app/models/application_record.rb"
+  skip "app/models/current.rb"
+  skip "app/helpers/application_helper.rb"
+  skip "app/mailers/passwords_mailer.rb"
 
   # Group coverage results for better organization
-  add_group "Controllers", "app/controllers"
-  add_group "Models", "app/models"
-  add_group "Services", "app/services"
-  add_group "Jobs", "app/jobs"
-  add_group "Helpers", "app/helpers"
-  add_group "Mailers", "app/mailers"
-  add_group "Channels", "app/channels"
-  add_group "Libraries", "lib/"
+  group "Controllers", "app/controllers"
+  group "Models", "app/models"
+  group "Services", "app/services"
+  group "Jobs", "app/jobs"
+  group "Helpers", "app/helpers"
+  group "Mailers", "app/mailers"
+  group "Channels", "app/channels"
+  group "Libraries", "lib/"
 
   # Track files
-  track_files "{app,lib}/**/*.rb"
+  cover "{app,lib}/**/*.rb"
 
   # Set up formatters
   formatter SimpleCov::Formatter::MultiFormatter.new([
