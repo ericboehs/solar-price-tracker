@@ -1,0 +1,12 @@
+<%= @product.title %> just hit its lowest price yet.
+
+Now:           <%= @product.display_price %>
+Was:           <%= number_to_currency(@previous_price) %> (<%= number_to_currency(@savings) %> off)
+Previous low:  <%= number_to_currency(@previous_low) %>
+
+Price history: <%= product_url(@product.slug) %>
+Buy it:        <%= @product.url %>
+
+--
+You get these because price alerts are on for <%= @user.email_address %>.
+Unsubscribe: <%= @unsubscribe_url %>

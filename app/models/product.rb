@@ -61,13 +61,26 @@ class Product < ApplicationRecord
       return false if price_diff <= 0.01
     end
 
-    price_histories.create!(
+    previous_low = price_histories.minimum(:price)
+
+    history = price_histories.create!(
       price: new_price,
       recorded_at: recorded_at
     )
+
+    if new_low?(new_price, previous_low)
+      PriceDropAlertJob.perform_later(self, previous_low: previous_low, previous_price: latest.price)
+    end
+
+    history
   end
 
   private
+
+  # A new historical low: strictly below every earlier recorded price (by more than a cent).
+  def new_low?(new_price, previous_low)
+    previous_low.present? && (previous_low - new_price).round(2) > 0.01
+  end
 
   def generate_slug_from_url
     return unless url.present?

@@ -1,9 +1,26 @@
 <div class="bg-white dark:bg-gray-900">
   <div class="mx-auto max-w-2xl px-4 py-16 sm:px-6 sm:py-24 lg:max-w-7xl lg:px-8">
-    <h2 class="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">Solar Equipment Products</h2>
-    <p class="mt-4 text-base text-gray-600 dark:text-gray-300">
-      Latest solar equipment from SignatureSolar.com with real-time pricing and availability.
-    </p>
+    <div class="sm:flex sm:items-start sm:justify-between sm:gap-6">
+      <div>
+        <h2 class="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">Solar Equipment Products</h2>
+        <p class="mt-4 text-base text-gray-600 dark:text-gray-300">
+          Latest solar equipment from SignatureSolar.com with real-time pricing and availability.
+        </p>
+      </div>
+      <div class="mt-4 sm:mt-0 shrink-0">
+        <% if current_user.price_alerts? %>
+          <%= button_to price_alerts_path, method: :delete, form_class: "inline",
+                class: "inline-flex items-center gap-x-1.5 rounded-md bg-white dark:bg-white/10 px-3 py-2 text-sm font-semibold text-gray-900 dark:text-white shadow-xs ring-1 ring-inset ring-gray-300 dark:ring-white/10 hover:bg-gray-50 dark:hover:bg-white/20" do %>
+            🔔 Price alerts on <span class="font-normal text-gray-500 dark:text-gray-400">· turn off</span>
+          <% end %>
+        <% else %>
+          <%= button_to price_alerts_path, form_class: "inline",
+                class: "inline-flex items-center gap-x-1.5 rounded-md bg-orange-600 px-3 py-2 text-sm font-semibold text-white shadow-xs hover:bg-orange-500 focus-visible:outline-solid focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange-600" do %>
+            🔕 Email me new lows
+          <% end %>
+        <% end %>
+      </div>
+    </div>
 
     <div class="mt-6 grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-4 xl:gap-x-8">
       <% @products.each do |product| %>

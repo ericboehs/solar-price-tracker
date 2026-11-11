@@ -13,6 +13,11 @@ Rails.application.routes.draw do
 
   # Products routes using slug as param
   resources :products, only: [ :index, :show ], param: :slug
+
+  # Price-drop email alerts: toggle while signed in, or unsubscribe from an email link.
+  resource :price_alerts, only: [ :create, :destroy ]
+  get "unsubscribe/:token", to: "unsubscribes#show", as: :unsubscribe
+  post "unsubscribe/:token", to: "unsubscribes#create"
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 
   # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.

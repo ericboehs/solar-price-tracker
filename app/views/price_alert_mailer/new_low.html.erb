@@ -1,0 +1,25 @@
+<div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif; max-width: 560px; margin: 0 auto; color: #111827;">
+  <p style="font-size: 13px; color: #ea580c; font-weight: 600; margin: 0 0 8px;">🔥 New historical low</p>
+  <h1 style="font-size: 20px; line-height: 1.3; margin: 0 0 16px;"><%= @product.title %></h1>
+
+  <% if @product.image_url.present? %>
+    <p style="margin: 0 0 16px;"><img src="<%= @product.image_url %>" alt="" width="240" style="max-width: 240px; height: auto;"></p>
+  <% end %>
+
+  <table role="presentation" style="border-collapse: collapse; margin: 0 0 20px; font-size: 15px;">
+    <tr><td style="padding: 4px 16px 4px 0; color: #6b7280;">Now</td><td style="padding: 4px 0; font-size: 22px; font-weight: 700; color: #15803d;"><%= @product.display_price %></td></tr>
+    <tr><td style="padding: 4px 16px 4px 0; color: #6b7280;">Was</td><td style="padding: 4px 0;"><%= number_to_currency(@previous_price) %> (<%= number_to_currency(@savings) %> off)</td></tr>
+    <tr><td style="padding: 4px 16px 4px 0; color: #6b7280;">Previous low</td><td style="padding: 4px 0;"><%= number_to_currency(@previous_low) %></td></tr>
+  </table>
+
+  <p style="margin: 0 0 24px;">
+    <a href="<%= @product.url %>" style="display: inline-block; background: #ea580c; color: #ffffff; text-decoration: none; padding: 10px 16px; border-radius: 6px; font-weight: 600;">View on SignatureSolar</a>
+    &nbsp;
+    <a href="<%= product_url(@product.slug) %>" style="color: #ea580c;">Price history</a>
+  </p>
+
+  <p style="font-size: 12px; color: #6b7280; border-top: 1px solid #e5e7eb; padding-top: 12px;">
+    You get these because price alerts are on for <%= @user.email_address %>.
+    <a href="<%= @unsubscribe_url %>" style="color: #6b7280;">Unsubscribe</a>
+  </p>
+</div>

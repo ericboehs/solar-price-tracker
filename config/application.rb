@@ -23,6 +23,11 @@ module SolarPriceTracker
     #
     config.time_zone = "Central Time (US & Canada)"
 
+    # Public sign-ups. Closed by default in production; override with
+    # REGISTRATIONS_OPEN=true|false.
+    config.x.registrations_open =
+      ENV.fetch("REGISTRATIONS_OPEN") { Rails.env.production? ? "false" : "true" } == "true"
+
     # Active Storage isn't used for uploads; skip the image_processing check.
     config.active_storage.variant_processor = :disabled
     # config.eager_load_paths << Rails.root.join("extras")

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_06_15_064806) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_11_155936) do
   create_table "price_histories", force: :cascade do |t|
     t.integer "product_id", null: false
     t.decimal "price", precision: 10, scale: 2, null: false
@@ -49,6 +49,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_15_064806) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.boolean "admin", default: false, null: false
+    t.boolean "price_alerts", default: false, null: false
     t.index ["email_address"], name: "index_users_on_email_address", unique: true
   end
 

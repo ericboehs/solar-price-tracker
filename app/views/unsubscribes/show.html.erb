@@ -1,0 +1,8 @@
+<div class="mx-auto max-w-md px-6 py-24 text-center">
+  <h1 class="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">Unsubscribe from price alerts?</h1>
+  <p class="mt-4 text-sm text-gray-600 dark:text-gray-300">
+    <%= @user.email_address %> will stop getting emails when products hit a new low.
+  </p>
+  <%= button_to "Unsubscribe", unsubscribe_path(token: params[:token]),
+        class: "mt-8 rounded-md bg-orange-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-xs hover:bg-orange-500 focus-visible:outline-solid focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange-600" %>
+</div>
