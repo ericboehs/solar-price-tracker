@@ -514,4 +514,69 @@ class ProductScraperServiceTest < ActiveSupport::TestCase
     result = service.send(:fetch_page, "https://example.com")
     assert_nil result
   end
+
+  def bigcommerce_page(title:, slug:, price:, next_href: nil)
+    link = next_href ? %(<link rel="next" href="#{next_href}">) : ""
+    Nokogiri::HTML(<<~HTML)
+      <html><head>#{link}</head><body>
+        <article class="card">
+          <h4 class="card-title"><a href="https://signaturesolar.com/#{slug}/">#{title}</a></h4>
+          <span data-product-price-without-tax>$#{price}</span>
+        </article>
+      </body></html>
+    HTML
+  end
+
+  test "scrape follows pagination across pages" do
+    service = ProductScraperService.new("https://signaturesolar.com/search.php?q=eg4", page_delay: 0)
+    page1 = bigcommerce_page(title: "EG4 Inverter A", slug: "inv-a", price: "100", next_href: "/search.php?q=eg4&page=2")
+    page2 = bigcommerce_page(title: "EG4 Inverter B", slug: "inv-b", price: "200")
+    service.expects(:fetch_page).with("https://signaturesolar.com/search.php?q=eg4").returns(page1)
+    service.expects(:fetch_page).with("https://signaturesolar.com/search.php?q=eg4&page=2").returns(page2)
+
+    products = service.scrape
+    assert_equal %w[inv-a inv-b], products.map(&:slug)
+  end
+
+  test "scrape stops at max_pages and does not revisit URLs" do
+    service = ProductScraperService.new("https://signaturesolar.com/a", page_delay: 0, max_pages: 2)
+    looping = bigcommerce_page(title: "EG4 Thing", slug: "thing", price: "5", next_href: "/b")
+    service.expects(:fetch_page).twice.returns(looping)
+
+    assert_equal 1, service.scrape.length
+  end
+
+  test "scrape sleeps between pages when page_delay is set" do
+    service = ProductScraperService.new("https://signaturesolar.com/a", page_delay: 0.5, max_pages: 2)
+    service.stubs(:fetch_page).returns(
+      bigcommerce_page(title: "EG4 A", slug: "a", price: "1", next_href: "/b"),
+      bigcommerce_page(title: "EG4 B", slug: "b", price: "2")
+    )
+    service.expects(:sleep).with(0.5).once
+
+    service.scrape
+  end
+
+  test "next_page_url ignores off-site and missing links" do
+    service = ProductScraperService.new
+    assert_nil service.send(:next_page_url, Nokogiri::HTML("<html></html>"))
+    off_site = Nokogiri::HTML(%(<html><head><link rel="next" href="https://evil.example.com/p2"></head></html>))
+    assert_nil service.send(:next_page_url, off_site)
+    bad = Nokogiri::HTML(%(<html><head><link rel="next" href="http://[bad"></head></html>))
+    assert_nil service.send(:next_page_url, bad)
+  end
+
+  test "fetch_page handles timeouts" do
+    service = ProductScraperService.new
+    URI.expects(:open).raises(Net::ReadTimeout)
+    assert_nil service.send(:fetch_page, "https://signaturesolar.com/")
+  end
+
+  test "bundle detection matches whole words only" do
+    service = ProductScraperService.new
+    assert service.send(:is_bundle_or_kit?, "EG4 Solar Kit with Batteries")
+    assert service.send(:is_bundle_or_kit?, "Hybrid Systems Bundle")
+    assert_not service.send(:is_bundle_or_kit?, "Breaker Reset Tool")
+    assert_not service.send(:is_bundle_or_kit?, "EG4 Rack Mount Offset Bracket")
+  end
 end

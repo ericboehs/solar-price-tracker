@@ -3,34 +3,36 @@ require "open-uri"
 
 class ProductScraperService
   BASE_URL = "https://signaturesolar.com"
+  USER_AGENT = "Mozilla/5.0 (compatible; SolarPriceTracker/1.0; +https://github.com/ericboehs/solar-price-tracker)"
+  MAX_PAGES = 10
+  PAGE_DELAY = 1.0 # seconds between paginated requests
 
-  def initialize(search_url = nil, debug: false, exclude_bundles: true, omit_terms: [])
+  def initialize(search_url = nil, debug: false, exclude_bundles: true, omit_terms: [], max_pages: MAX_PAGES, page_delay: PAGE_DELAY)
     @search_url = search_url
     @scraped_products = []
     @debug = debug
     @exclude_bundles = exclude_bundles
     @omit_terms = Array(omit_terms).map(&:downcase)
+    @max_pages = max_pages
+    @page_delay = page_delay
   end
 
   def scrape(url = nil)
     url ||= @search_url
     raise ArgumentError, "No URL provided" unless url
 
-    debug_log "Starting scrape of: #{url}"
-    page = fetch_page(url)
-    return [] unless page
+    visited = Set.new
+    while url && visited.size < @max_pages && visited.add?(url)
+      debug_log "Fetching page #{visited.size}: #{url}"
+      page = fetch_page(url)
+      break unless page
 
-    debug_log "Page fetched successfully, title: #{page.title}"
-
-    product_data_list = extract_products(page)
-    debug_log "Extracted #{product_data_list.length} product data entries"
-
-    product_data_list.each_with_index do |product_data, index|
-      debug_log "Processing product #{index + 1}: #{product_data[:title]}"
-      product = find_or_create_product(product_data)
-      @scraped_products << product if product
+      scrape_page(page)
+      url = next_page_url(page)
+      sleep(@page_delay) if url && @page_delay.positive?
     end
 
+    @scraped_products.uniq!
     debug_log "Successfully scraped #{@scraped_products.length} products"
     @scraped_products
   end
@@ -42,11 +44,36 @@ class ProductScraperService
 
   private
 
+  def scrape_page(page)
+    debug_log "Page fetched successfully, title: #{page.title}"
+
+    product_data_list = extract_products(page)
+    debug_log "Extracted #{product_data_list.length} product data entries"
+
+    product_data_list.each_with_index do |product_data, index|
+      debug_log "Processing product #{index + 1}: #{product_data[:title]}"
+      product = find_or_create_product(product_data)
+      @scraped_products << product if product
+    end
+  end
+
+  # Follows BigCommerce pagination (<link rel="next"> or the pagination widget),
+  # staying on signaturesolar.com.
+  def next_page_url(page)
+    href = page.at_css("link[rel=next], .pagination-item--next a, a[rel=next]")&.[]("href")
+    return nil if href.blank?
+
+    next_url = URI.join(BASE_URL, href).to_s
+    next_url.start_with?(BASE_URL) ? next_url : nil
+  rescue URI::InvalidURIError
+    nil
+  end
+
   def fetch_page(url)
-    URI.open(url) do |page|
+    URI.open(url, "User-Agent" => USER_AGENT, open_timeout: 15, read_timeout: 30) do |page|
       Nokogiri::HTML(page)
     end
-  rescue OpenURI::HTTPError, SocketError => e
+  rescue OpenURI::HTTPError, SocketError, Net::OpenTimeout, Net::ReadTimeout => e
     Rails.logger.error "Failed to fetch page #{url}: #{e.message}"
     nil
   end
@@ -224,7 +251,7 @@ class ProductScraperService
     ]
 
     title_lower = title.downcase
-    bundle_keywords.any? { |keyword| title_lower.include?(keyword) }
+    bundle_keywords.any? { |keyword| title_lower.match?(/\b#{Regexp.escape(keyword)}s?\b/) }
   end
 
   def should_omit_product?(title)
