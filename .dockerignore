@@ -49,3 +49,13 @@
 # Ignore Docker-related files
 /.dockerignore
 /Dockerfile*
+
+# Not needed at runtime
+/coverage
+/test
+/docs
+/.claude
+/.ruby-lsp
+/.pi
+/*.md
+!/README.md
