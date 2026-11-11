@@ -2,7 +2,7 @@ production:
   scrape_watches:
     class: ScrapeWatchesJob
     queue: default
-    schedule: every day at 10pm
+    schedule: every day at 10pm America/Chicago
 
 development:
   scrape_watches:

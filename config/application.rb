@@ -21,7 +21,10 @@ module SolarPriceTracker
     # These settings can be overridden in specific environments using the files
     # in config/environments, which are processed later.
     #
-    # config.time_zone = "Central Time (US & Canada)"
+    config.time_zone = "Central Time (US & Canada)"
+
+    # Active Storage isn't used for uploads; skip the image_processing check.
+    config.active_storage.variant_processor = :disabled
     # config.eager_load_paths << Rails.root.join("extras")
   end
 end
